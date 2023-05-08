@@ -1,0 +1,15 @@
+{
+  "name": "backlog-power-up",
+  "version": "1.0.0",
+  "description": "A custom Trello Power-Uo for managing backlog automation and tasks",
+  "main": "index.js",
+  "repository": "https://github.com/MusaabFaozi/backlog-power-up.git",
+  "author": "<mosab.albakry@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "parcel build src/html/*.html"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.5"
+  }
+}
