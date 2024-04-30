@@ -5,9 +5,9 @@ window.TrelloPowerUp.initialize({
         return [{
             icon: "https://cdn-icons-png.flaticon.com/512/5360/5360758.png",
             text: "Backlog Items",
-            callback: function (t) {
-                return t.alert("Hello, there!")
-            }
+            // callback: function (t) {
+            //     return t.alert("Hello, there!")
+            // }
         }];
     }
 });
