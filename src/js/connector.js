@@ -6,7 +6,7 @@ window.TrelloPowerUp.initialize({
             icon: "https://cdn-icons-png.flaticon.com/512/5360/5360758.png",
             text: "Backlog Items",
             callback: function (t) {
-                return t.board().then(card => alert("Hello, there!"))
+                return t.alert("Hello, there!")
             }
         }];
     }
