@@ -1,5 +1,5 @@
 var backlog_all = function (t) {
-    return t.cards().then(board => alert("Hello, there!"))
+    return t.board().then(board => alert("Hello, there!"))
 }
 
 window.TrelloPowerUp.initialize({
@@ -7,7 +7,9 @@ window.TrelloPowerUp.initialize({
         return [{
             icon: "https://cdn-icons-png.flaticon.com/512/5360/5360758.png",
             text: "Backlog All!",
-            callback: backlog_all (t)
+            callback: function (t) {
+                return backlog_all(t)
+            }
         }];
     }
 });
