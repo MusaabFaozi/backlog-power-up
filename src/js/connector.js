@@ -3,9 +3,15 @@ var backlog_all = function (t) {
 
     console.log(t.lists());
 
-    return t.popup({
-        title: "Popup Test",
-        url: "./popup.html",
+    return t.get("lists", "shared")
+    .then(function(t, lists) {
+
+        console.log(lists)
+
+        t.popup({
+            title: "All lists",
+            url: "./popup.html",
+        })
     })
 }
 
