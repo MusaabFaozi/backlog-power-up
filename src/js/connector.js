@@ -1,9 +1,9 @@
 
 var backlog_all = function (t) {
 
-    console.log(t);
+    console.log(t.lists());
 
-    return t.board().then(hello => alert("Hello, there!"))
+    return t.lists().then(hello => alert("Hello, there!"))
 }
 
 window.TrelloPowerUp.initialize({
