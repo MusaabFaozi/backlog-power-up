@@ -5,7 +5,7 @@ var backlog_all = function (t) {
 
     return t.popup({
         title: "Popup Test",
-        url: "../html/popup.html",
+        url: "/html/popup.html",
     })
 }
 
