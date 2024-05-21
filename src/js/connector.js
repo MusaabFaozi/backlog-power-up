@@ -3,7 +3,10 @@ var backlog_all = function (t) {
 
     console.log(t.lists());
 
-    return t.lists().then(hello => alert("Hello, there!"))
+    return t.popup({
+        title: "Popup Test",
+        url: "../popup.html",
+    })
 }
 
 window.TrelloPowerUp.initialize({
