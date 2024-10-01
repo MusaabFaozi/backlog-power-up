@@ -1,3 +1,9 @@
+require('dotenv').config();
+const apiKey = process.env.NETLIFY_TRELLO_API_KEY;
+const token = process.env.NETLIFY_TRELLO_BACKLOG_TOKEN;
+
+console.log("apiKey", apiKey);
+console.log("token", token);
 
 var backlog_all = function (t) {
 
