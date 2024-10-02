@@ -12,6 +12,7 @@ var backlog_all = function(t) {
     return t.lists('all')
     .then(function(lists) {
 
+        console.log("lists: ", lists);
         const backlog_list = lists.find(list => list.name.toLowerCase() === 'backlog');
         console.log("backlog list: ", backlog_list);
 
