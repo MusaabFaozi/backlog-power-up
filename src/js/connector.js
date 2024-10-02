@@ -74,7 +74,7 @@ var backlog_all = function(t) {
                         const card_id = card.id;
 
                         console.log(`Created a new card with id: ${card_id}`);
-                        t.set(card_id, 'shared', {
+                        t.set('card', 'shared', {
                             checklist_item_id: item.id
                         })
                     });
