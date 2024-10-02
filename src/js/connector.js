@@ -9,16 +9,10 @@ const AUXILIARY_LISTS = ["done today", ]
 
 var backlog_all = function(t) {
 
-    return t.board("id", "name", "lists")
-    .then(function(board) {
+    return t.lists('all')
+    .then(function(lists) {
 
-        const boardid = board.id;
-        const boardname = board.name;
-        console.log("board lists: ", board.lists);
-        const backlog_list = board.lists.find(list => list.name.toLowerCase() === 'backlog');
-
-        console.log("board id: ", boardid);
-        console.log("board name: ", boardname);
+        const backlog_list = lists.find(list => list.name.toLowerCase() === 'backlog');
         console.log("backlog list: ", backlog_list);
 
         if(!backlog_list) {
