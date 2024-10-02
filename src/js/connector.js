@@ -14,6 +14,7 @@ var backlog_all = function(t) {
 
         const boardid = board.id;
         const boardname = board.name;
+        console.log("board lists: ", board.lists);
         const backlog_list = board.lists.find(list => list.name.toLowerCase() === 'backlog');
 
         console.log("board id: ", boardid);
