@@ -13,7 +13,6 @@ var backlog_all = function(t) {
     .then(function(lists) {
 
         const backlog_list = lists.find(list => list.name.toLowerCase() === BACKLOG_LIST_NAME);
-        console.log("backlog list: ", backlog_list);
 
         if(!backlog_list) {
             return t.popup({
@@ -29,11 +28,10 @@ var backlog_all = function(t) {
             .filter(list => AUXILIARY_LISTS.includes(list.name.toLowerCase()))
             .map(list => list.id);
 
-        console.log("backlog_list_id: ", backlog_list_id);
-        console.log("auxiliary_list_ids: ", auxiliary_list_ids);
         // Retrieve all cards
         return t.cards('id', 'name', 'idList', 'idChecklists').then(function(cards) {
             // Filter out backlog and auxiliary cards
+            console.log("cards: ", cards);
             const relevant_cards = cards.filter(card => card.idList !== backlog_list_id && !auxiliary_list_ids.includes(card.idList));
             console.log("relevant_cards: ", relevant_cards);
 
