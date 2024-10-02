@@ -12,8 +12,7 @@ var backlog_all = function(t) {
     return t.lists('all')
     .then(function(lists) {
 
-        console.log("lists: ", lists);
-        const backlog_list = lists.find(list => list.name.toLowerCase() === 'backlog');
+        const backlog_list = lists.find(list => list.name.toLowerCase() === BACKLOG_LIST_NAME);
         console.log("backlog list: ", backlog_list);
 
         if(!backlog_list) {
@@ -30,10 +29,13 @@ var backlog_all = function(t) {
             .filter(list => AUXILIARY_LISTS.includes(list.name.toLowerCase()))
             .map(list => list.id);
 
+        console.log("backlog_list_id: ", backlog_list_id);
+        console.log("auxiliary_list_ids: ", auxiliary_list_ids);
         // Retrieve all cards
         return t.cards('id', 'name', 'idList', 'idChecklists').then(function(cards) {
             // Filter out backlog and auxiliary cards
             const relevant_cards = cards.filter(card => card.idList !== backlog_list_id && !auxiliary_list_ids.includes(card.idList));
+            console.log("relevant_cards: ", relevant_cards);
 
             const card_checklist_promises = relevant_cards.map(card => {
               return t.get(`/1/cards/${card.id}/checklists`, { key: apiKey, token: token })
@@ -64,7 +66,7 @@ var backlog_all = function(t) {
                     return t.popup({
                         title: 'Success',
                         items: [
-                        { text: `Created ${incomplete_checklist_items.length} cards in Backlog for incomplete items.`, callback: function(t) { return t.closePopup(); }}
+                        { text: `Created ${incomplete_checklist_items.length} cards in ${BACKLOG_LIST_NAME} for incomplete items.`, callback: function(t) { return t.closePopup(); }}
                         ]
                     });
                 });
