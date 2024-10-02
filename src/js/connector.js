@@ -29,7 +29,7 @@ var backlog_all = function(t) {
             .map(list => list.id);
 
         // Retrieve all cards
-        return t.cards('id', 'name', 'idList', 'idChecklists').then(function(cards) {
+        return t.cards('all').then(function(cards) {
             // Filter out backlog and auxiliary cards
             console.log("cards: ", cards);
             const relevant_cards = cards.filter(card => card.idList !== backlog_list_id && !auxiliary_list_ids.includes(card.idList));
