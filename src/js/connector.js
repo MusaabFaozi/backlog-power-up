@@ -9,7 +9,7 @@ const AUXILIARY_LISTS = ["done today", ]
 
 var backlog_all = function(t) {
 
-    return t.board("all")
+    return t.board("id", "name", "lists")
     .then(function(board) {
 
         const boardid = board.id;
