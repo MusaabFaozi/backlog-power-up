@@ -44,6 +44,7 @@ var backlog_all = function(t) {
                   return incomplete_items;
                 });
             });
+            console.log("card_checklist_promises: ", card_checklist_promises);
 
             // Wait for all checklist data to be retrieved
             return Promise.all(card_checklist_promises).then(function(all_incomplete_items) {
