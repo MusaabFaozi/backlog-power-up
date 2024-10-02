@@ -39,8 +39,8 @@ var backlog_all = function(t) {
               return t.get(`/1/cards/${card.id}/checklists`, { key: apiKey, token: token })
                 .then(function(checklists) {
                     const incomplete_items = checklists.flatMap(checklist => checklist.checkItems)
-                        .filter(item => item.state === 'incomplete')
-                        .map(item => ({ cardName: card.name, itemName: item.name }));
+                        // .filter(item => item.state === 'incomplete')
+                        // .map(item => ({ cardName: card.name, itemName: item.name }));
 
                     console.log("incomplete_items: ", incomplete_items);
                     return incomplete_items;
