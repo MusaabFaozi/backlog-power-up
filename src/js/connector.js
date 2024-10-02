@@ -36,17 +36,16 @@ var backlog_all = function(t) {
             console.log("relevant_cards: ", relevant_cards);
 
             const card_checklist_promises = relevant_cards.map(card => {
-              return t.get(`/1/cards/${card.id}/checklists`, { key: apiKey, token: token })
-                .then(function(checklists) {
-                    console.log("checklists: ", checklists);
+                return fetch(`https://api.trello.com/1/cards/${card.id}/checklists?key=${apiKey}&token=${token}`)
+                  .then(response => response.json())
+                  .then(function(checklists) {
                     const incomplete_items = checklists.flatMap(checklist => checklist.checkItems)
-                        .filter(item => item.state === 'incomplete')
-                        .map(item => ({ cardName: card.name, itemName: item.name }));
-
-                    console.log("incomplete_items: ", incomplete_items);
+                      .filter(item => item.state === 'incomplete')
+                      .map(item => ({ cardName: card.name, itemName: item.name }));
                     return incomplete_items;
-                });
-            });
+                  });
+              });
+  
             console.log("card_checklist_promises: ", card_checklist_promises);
 
             // Wait for all checklist data to be retrieved
