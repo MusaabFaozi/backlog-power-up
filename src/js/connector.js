@@ -2,22 +2,19 @@ require('dotenv').config();
 const apiKey = process.env.TRELLO_API_KEY;
 const token = process.env.TRELLO_BACKLOG_TOKEN;
 
-console.log("apiKey", apiKey);
-console.log("token", token);
 
-var backlog_all = function (t) {
+var backlog_all = function(t) {
 
     console.log(t.lists());
 
-    return t.get("lists", "shared")
-    .then(function(t, lists) {
+    return t.board("id", "name")
+    .then(function(board) {
 
-        console.log(lists)
+        const boardid = board.id;
+        const boardname = board.name;
+        console.log("board id: ", boardid);
+        console.log("board name: ", boardname);
 
-        t.popup({
-            title: "All lists",
-            url: "./popup.html",
-        })
     })
 }
 
