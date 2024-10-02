@@ -52,16 +52,24 @@ var backlog_all = function(t) {
             return Promise.all(card_checklist_promises).then(function(all_incomplete_items) {
                 const incomplete_checklist_items = all_incomplete_items.flat(); // Flatten the array of checklist items
   
-                // Create a new card in the Backlog for each incomplete checklist item
+                // Step 5: Create a new card in the Backlog for each incomplete checklist item
                 const create_card_promises = incomplete_checklist_items.map(item => {
-                  return t.post(`/1/cards`, {
-                    name: `[${item.cardName}] ${item.itemName}`,
-                    desc: `Originally from card: ${item.cardName}`,
-                    idList: backlog_list_id,
-                    pos: 'top'
-                  }, { key: apiKey, token: token });
+                  return fetch(`https://api.trello.com/1/cards`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      name: `[${item.cardName}] ${item.itemName}`,
+                      desc: `Originally from card: ${item.cardName}`,
+                      idList: backlog_list_id,
+                      pos: 'top',
+                      key: apiKey,
+                      token: token
+                    })
+                  });
                 });
-
+  
                 // Wait for all cards to be created
                 return Promise.all(create_card_promises).then(function() {
                     return t.popup({
