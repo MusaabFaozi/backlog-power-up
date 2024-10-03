@@ -8,7 +8,51 @@ const WIP_LISTS = ["today's tasks"];
 const DONE_LISTS = ["done today!"];
 
 
-var backlog_all = function(t) {
+// Get all cards in certain lists
+const get_cards_in_lists = async (list_ids) => {
+    const cards = [];
+    
+    for (const list_id of list_ids) {
+        const response = await fetch(`https://api.trello.com/1/lists/${list_id}/cards?key=${apiKey}&token=${token}`, {
+            method: 'GET'
+        });
+        
+        if (response.ok) {
+            const list_cards = await response.json();
+            cards.push(...list_cards);
+        } else {
+            console.error(`Error retrieving cards from list ${list_id}:`, response.statusText);
+        }
+    }
+    
+    return cards;
+};
+
+
+// Function to delete a card by card id
+const delete_card = async (card_id) => {
+    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
+      method: 'DELETE'
+    });
+    
+    if (response.ok) {
+      console.log(`Card ${card_id} deleted successfully`);
+    } else {
+      console.error(`Error deleting card ${card_id}:`, response.statusText);
+    }
+};
+
+
+const delete_all_cards_in_lists = async (list_ids) => {
+    const cards_to_delete = await get_cards_in_lists(list_ids);
+  
+    for (const card of cards_to_delete) {
+      await delete_card(card.id); // Delete each card
+    }
+  };
+
+
+const backlog_all = async(t) {
 
     return t.lists('all')
     .then(function(lists) {
@@ -31,6 +75,11 @@ var backlog_all = function(t) {
         const done_list_ids = lists
             .filter(list => DONE_LISTS.includes(list.name.toLowerCase()))
             .map(list => list.id);
+
+        var combined_init_list_ids = [backlog_list_id];
+        combined_init_list_ids.concat(wip_list_ids);
+        // Delete existing cards before backlogging cards
+        await delete_all_cards_in_lists(combined_init_list_ids);
 
         // Retrieve all cards
         return t.cards('all').then(function(cards) {
