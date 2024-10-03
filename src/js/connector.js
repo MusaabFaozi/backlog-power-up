@@ -78,9 +78,8 @@ const backlog_all = async (t) => {
             .map(list => list.id);
 
         // Delete existing cards before backlogging cards
-        var combined_init_list_ids = [backlog_list_id];
-        combined_init_list_ids.concat(wip_list_ids);
-        console.log(combined_init_list_ids);
+        var combined_init_list_ids = [backlog_list_id, ...wip_list_ids];
+        console.log("combined_init_list_ids: ", combined_init_list_ids);
         delete_all_cards_in_lists(combined_init_list_ids);
 
         // Retrieve all cards
