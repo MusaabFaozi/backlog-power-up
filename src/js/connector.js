@@ -43,6 +43,7 @@ const delete_card = async (card_id) => {
 };
 
 
+// Function to delete all cards in given lists
 const delete_all_cards_in_lists = async (list_ids) => {
     const cards_to_delete = await get_cards_in_lists(list_ids);
   
@@ -52,7 +53,7 @@ const delete_all_cards_in_lists = async (list_ids) => {
   };
 
 
-const backlog_all = async(t) {
+const backlog_all = async (t) => {
 
     return t.lists('all')
     .then(function(lists) {
@@ -76,9 +77,9 @@ const backlog_all = async(t) {
             .filter(list => DONE_LISTS.includes(list.name.toLowerCase()))
             .map(list => list.id);
 
+        // Delete existing cards before backlogging cards
         var combined_init_list_ids = [backlog_list_id];
         combined_init_list_ids.concat(wip_list_ids);
-        // Delete existing cards before backlogging cards
         await delete_all_cards_in_lists(combined_init_list_ids);
 
         // Retrieve all cards
