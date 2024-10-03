@@ -80,7 +80,7 @@ const backlog_all = async (t) => {
         // Delete existing cards before backlogging cards
         var combined_init_list_ids = [backlog_list_id];
         combined_init_list_ids.concat(wip_list_ids);
-        await delete_all_cards_in_lists(combined_init_list_ids);
+        delete_all_cards_in_lists(combined_init_list_ids);
 
         // Retrieve all cards
         return t.cards('all').then(function(cards) {
