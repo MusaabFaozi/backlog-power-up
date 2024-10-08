@@ -45,6 +45,8 @@ const delete_card = async (card_id) => {
     } else {
       console.error(`Error deleting card ${card_id}:`, response.statusText);
     }
+
+    return response;
 };
 
 
@@ -53,14 +55,14 @@ const delete_all_cards_in_lists = async (list_ids) => {
     const cards_to_delete = await get_cards_in_lists(list_ids);
     
     const card_delete_promises = cards_to_delete.map(async card => {
-        await delete_card(card);
+        await delete_card(card.id);
         return card.name;
     });
     
     if (DEBUG) {
         console.log("card_delete_promises: ", card_delete_promises);
     }
-    
+
     return Promise.all(card_delete_promises);
 };
 
@@ -76,7 +78,7 @@ const backlog_all = async (t) => {
             items: [
                 { text: 'Backlog list is not found on this board.', callback: function(t) { return t.closePopup(); } }
             ]
-            });
+        });
     }
 
     const backlog_list_id = backlog_list.id;
