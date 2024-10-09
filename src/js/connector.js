@@ -11,7 +11,7 @@ const {
     DONE_LISTS,
     VERBOSE,
     DEBUG,
-} = require('.config');
+} = require('./config');
 
 
 const backlog_all = async (t) => {
