@@ -50,7 +50,7 @@ const get_incomplete_checklist_items = async (card) => {
 };
 
 
-const create_card_from_checklist_item = async (t, checklist_item) => {
+const create_card_from_checklist_item = async (t, list_id, checklist_item) => {
     const response = await fetch(`https://api.trello.com/1/cards`, {
         method: 'POST',
         headers: {
@@ -59,7 +59,7 @@ const create_card_from_checklist_item = async (t, checklist_item) => {
         body: JSON.stringify({
             name: `[${checklist_item.cardName}] ${checklist_item.itemName}`,
             desc: `Originally from card: ${checklist_item.cardName} in ${checklist_item.idList}`,
-            idList: backlog_list_id,
+            idList: list_id,
             pos: 'bottom',
             key: apiKey,
             token: token
@@ -181,7 +181,7 @@ const backlog_all = async (t) => {
     // Create a new card in the Backlog for each incomplete checklist item
     const create_card_promises = incomplete_checklist_items.map(async checklist_item => {
         console.log("checklist_item: ", checklist_item);
-        return create_card_from_checklist_item(t, checklist_item);
+        return create_card_from_checklist_item(t, backlog_list_id, checklist_item);
     });
 
     if (DEBUG) {
