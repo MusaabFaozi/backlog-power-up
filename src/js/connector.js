@@ -138,6 +138,11 @@ const backlog_all = async (t) => {
         .filter(list => DONE_LISTS.includes(list.name.toLowerCase()))
         .map(list => list.id);
     
+    if (DEBUG) {
+        console.log("backlog_list_id: ", backlog_list_id);
+        console.log("wip_list_ids: ", wip_list_ids);
+        console.log("done_list_ids: ", done_list_ids);
+    }
     // Delete existing cards before backlogging cards
     const combined_init_list_ids = [backlog_list_id, ...wip_list_ids];
     console.log("combined_init_list_ids: ", combined_init_list_ids);
