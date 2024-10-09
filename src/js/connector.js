@@ -158,20 +158,23 @@ const backlog_all = async (t) => {
 
     const relevant_cards = cards.filter(card => card.idList !== backlog_list_id 
         && !wip_list_ids.includes(card.idList) && !done_list_ids.includes(card.idList));
-    
+
     if (DEBUG) {
         console.log("relevant_cards: ", relevant_cards);
     }
 
-    const card_checklist_promises = relevant_cards.map(async card => {
-        return get_incomplete_checklist_items(card);
-    });
+    const all_incomplete_items = await Promise.all(
+        relevant_cards.map(async card => {
+            const card_checklist_promises = await get_incomplete_checklist_items(card);
 
-    if (DEBUG) {
-        console.log("card_checklist_promises: ", card_checklist_promises);
-    }
+            if (DEBUG) {
+                console.log("card_checklist_promises: ", card_checklist_promises);
+            }
 
-    const all_incomplete_items = await Promise.all(card_checklist_promises);
+            return await Promise.all(card_checklist_promises);
+        })
+    );
+
     const incomplete_checklist_items = all_incomplete_items.flat(); // Flatten the array of checklist items
 
     if (DEBUG) {
