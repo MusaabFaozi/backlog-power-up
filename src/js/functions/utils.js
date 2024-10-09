@@ -4,7 +4,7 @@ const {
     token,
     VERBOSE,
     DEBUG,
-} = require('..config');
+} = require('../config');
 
 // Get all cards in certain lists
 const get_cards_in_lists = async (list_ids) => {
