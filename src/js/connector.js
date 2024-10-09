@@ -169,6 +169,10 @@ const backlog_all = async (t) => {
     return Promise.all(card_checklist_promises).then(function(all_incomplete_items) {
         const incomplete_checklist_items = all_incomplete_items.flat(); // Flatten the array of checklist items
 
+        if (DEBUG) {
+            console.log("incomplete_checklist_items: ", incomplete_checklist_items);
+        }
+
         // Create a new card in the Backlog for each incomplete checklist item
         const create_card_promises = incomplete_checklist_items.map(checklist_item => {
             return create_card_from_checklist_item(t, checklist_item);
