@@ -174,8 +174,8 @@ const backlog_all = async (t) => {
         }
 
         // Create a new card in the Backlog for each incomplete checklist item
-        const create_card_promises = incomplete_checklist_items.map(checklist_item => {
-            return create_card_from_checklist_item(t, checklist_item);
+        const create_card_promises = incomplete_checklist_items.map(async checklist_item => {
+            return await create_card_from_checklist_item(t, checklist_item);
         });
 
         // Wait for all cards to be created
