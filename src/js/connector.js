@@ -158,7 +158,7 @@ const backlog_all = async (t) => {
     }
 
     const card_checklist_promises = relevant_cards.map(async card => {
-        return get_incomplete_checklist_items(card);
+        return await get_incomplete_checklist_items(card);
     });
 
     if (DEBUG) {
