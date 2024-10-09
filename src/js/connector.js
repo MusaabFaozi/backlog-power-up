@@ -179,6 +179,10 @@ const backlog_all = async (t) => {
             return await create_card_from_checklist_item(t, checklist_item);
         });
 
+        if (DEBUG) {
+            console.log("create_card_promises:", create_card_promises);
+        }
+
         // Wait for all cards to be created
         return Promise.all(create_card_promises).then(function() {
             return t.popup({
