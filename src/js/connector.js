@@ -1,28 +1,26 @@
-require('dotenv').config();
 
-const apiKey = process.env.TRELLO_API_KEY;
-const token = process.env.TRELLO_BACKLOG_TOKEN;
-
-// Settings config
-const BACKLOG_LIST_NAME = "backlog";
-const WIP_LISTS = ["today's tasks"];
-const DONE_LISTS = ["done today!"];
-var VERBOSE = true;
-const DEBUG = true;
-if (DEBUG) {
-    VERBOSE = DEBUG;
-}
-
-const {get_incomplete_checklist_items,
+const {
+    get_incomplete_checklist_items,
     create_card_from_checklist_item,
     delete_all_cards_in_lists,
 } = require('./functions/utils');
 
+const {
+    BACKLOG_LIST_NAME,
+    WIP_LISTS,
+    DONE_LISTS,
+    VERBOSE,
+    DEBUG,
+} = require('./config');
+
 
 const backlog_all = async (t) => {
 
+    if (VERBOSE) {
+        console.log("Backlogging all cards...");
+    }
+    
     const lists = await t.lists('all');
-
     const backlog_list = lists.find(list => list.name.toLowerCase() === BACKLOG_LIST_NAME);
     if(!backlog_list) {
         return t.popup({
@@ -92,6 +90,10 @@ const backlog_all = async (t) => {
 
     if (DEBUG) {
         console.log("create_card_promises:", create_card_promises);
+    }
+
+    if (VERBOSE) {
+        console.log(`Created ${incomplete_checklist_items.length} cards in ${BACKLOG_LIST_NAME} for incomplete items.`);
     }
 
     // Wait for all cards to be created

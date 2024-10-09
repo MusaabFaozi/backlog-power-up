@@ -1,3 +1,11 @@
+
+const {
+    apiKey,
+    token,
+    VERBOSE,
+    DEBUG,
+} = require('..config');
+
 // Get all cards in certain lists
 const get_cards_in_lists = async (list_ids) => {
     const cards = [];
