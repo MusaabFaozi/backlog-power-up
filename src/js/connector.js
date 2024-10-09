@@ -143,6 +143,7 @@ const backlog_all = async (t) => {
         console.log("wip_list_ids: ", wip_list_ids);
         console.log("done_list_ids: ", done_list_ids);
     }
+
     // Delete existing cards before backlogging cards
     const combined_init_list_ids = [backlog_list_id, ...wip_list_ids];
     console.log("combined_init_list_ids: ", combined_init_list_ids);
@@ -168,6 +169,8 @@ const backlog_all = async (t) => {
 
     if (DEBUG) {
         console.log("card_checklist_promises: ", card_checklist_promises);
+        console.log("Promise.all(card_checklist_promises): ", Promise.all(card_checklist_promises));
+        Promise.all(card_checklist_promises)
     }
 
     // Wait for all checklist data to be retrieved
