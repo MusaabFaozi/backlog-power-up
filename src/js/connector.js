@@ -11,7 +11,7 @@ const {
     DONE_LISTS,
     VERBOSE,
     DEBUG,
-} = require('./config');
+} = require('.config');
 
 
 const backlog_all = async (t) => {
@@ -19,7 +19,7 @@ const backlog_all = async (t) => {
     if (VERBOSE) {
         console.log("Backlogging all cards...");
     }
-    
+
     const lists = await t.lists('all');
     const backlog_list = lists.find(list => list.name.toLowerCase() === BACKLOG_LIST_NAME);
     if(!backlog_list) {
