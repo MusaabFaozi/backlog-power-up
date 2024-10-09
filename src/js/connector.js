@@ -1,5 +1,4 @@
 require('dotenv').config();
-require('./functions/utils');
 
 const apiKey = process.env.TRELLO_API_KEY;
 const token = process.env.TRELLO_BACKLOG_TOKEN;
@@ -13,6 +12,11 @@ const DEBUG = true;
 if (DEBUG) {
     VERBOSE = DEBUG;
 }
+
+const {get_incomplete_checklist_items,
+    create_card_from_checklist_item,
+    delete_all_cards_in_lists,
+} = require('./functions/utils');
 
 
 const backlog_all = async (t) => {

@@ -99,3 +99,12 @@ const delete_all_cards_in_lists = async (list_ids) => {
 
     return Promise.all(card_delete_promises);
 };
+
+
+module.exports = {
+    get_cards_in_lists,
+    get_incomplete_checklist_items,
+    create_card_from_checklist_item,
+    delete_card,
+    delete_all_cards_in_lists,
+};
