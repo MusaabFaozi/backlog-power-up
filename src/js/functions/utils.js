@@ -63,7 +63,7 @@ const create_card_from_checklist_item = async (t, list_id, checklist_item) => {
         throw new Error(`Failed to create card: ${response.status} ${response.statusText}`);
     }
     
-    const card = response.json();
+    const card = await response.json();
 
     if (DEBUG) {
         console.log("card: ", card);
