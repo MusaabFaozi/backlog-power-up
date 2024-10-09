@@ -64,6 +64,11 @@ const create_card_from_checklist_item = async (t, list_id, checklist_item) => {
     }
     
     const card = response.json();
+
+    if (DEBUG) {
+        console.log("card: ", card);
+    }
+
     const card_id = card.id;
 
     if (VERBOSE) {
