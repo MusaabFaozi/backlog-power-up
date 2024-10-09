@@ -170,7 +170,7 @@ const backlog_all = async (t) => {
         const incomplete_checklist_items = all_incomplete_items.flat(); // Flatten the array of checklist items
 
         if (DEBUG) {
-            console.log("incomplete_checklist_items: ", incomplete_checklist_items);
+            console.log("incomplete_checklist_items: ", incomplete_checklist_items.PromiseObject);
         }
 
         // Create a new card in the Backlog for each incomplete checklist item
