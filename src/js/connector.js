@@ -164,41 +164,37 @@ const backlog_all = async (t) => {
     }
 
     const card_checklist_promises = relevant_cards.map(async card => {
-        return await get_incomplete_checklist_items(card);
+        return get_incomplete_checklist_items(card);
     });
 
     if (DEBUG) {
         console.log("card_checklist_promises: ", card_checklist_promises);
-        console.log("Promise.all(card_checklist_promises): ", Promise.all(card_checklist_promises));
-        Promise.all(card_checklist_promises)
     }
 
-    // Wait for all checklist data to be retrieved
-    return Promise.all(card_checklist_promises).then(function(all_incomplete_items) {
-        const incomplete_checklist_items = all_incomplete_items.flat(); // Flatten the array of checklist items
+    const all_incomplete_items = await Promise.all(card_checklist_promises);
+    const incomplete_checklist_items = all_incomplete_items.flat(); // Flatten the array of checklist items
 
-        if (DEBUG) {
-            console.log("incomplete_checklist_items: ", incomplete_checklist_items);
-        }
+    if (DEBUG) {
+        console.log("incomplete_checklist_items: ", incomplete_checklist_items);
+    }
 
-        // Create a new card in the Backlog for each incomplete checklist item
-        const create_card_promises = incomplete_checklist_items.map(async checklist_item => {
-            console.log("checklist_item: ", checklist_item);
-            return await create_card_from_checklist_item(t, checklist_item);
-        });
+    // Create a new card in the Backlog for each incomplete checklist item
+    const create_card_promises = incomplete_checklist_items.map(async checklist_item => {
+        console.log("checklist_item: ", checklist_item);
+        return create_card_from_checklist_item(t, checklist_item);
+    });
 
-        if (DEBUG) {
-            console.log("create_card_promises:", create_card_promises);
-        }
+    if (DEBUG) {
+        console.log("create_card_promises:", create_card_promises);
+    }
 
-        // Wait for all cards to be created
-        return Promise.all(create_card_promises).then(function() {
-            return t.popup({
-                title: 'Success',
-                items: [
-                { text: `Created ${incomplete_checklist_items.length} cards in ${BACKLOG_LIST_NAME} for incomplete items.`, callback: function(t) { return t.closePopup(); }}
-                ]
-            });
+    // Wait for all cards to be created
+    return Promise.all(create_card_promises).then(function() {
+        return t.popup({
+            title: 'Success',
+            items: [
+            { text: `Created ${incomplete_checklist_items.length} cards in ${BACKLOG_LIST_NAME} for incomplete items.`, callback: function(t) { return t.closePopup(); }}
+            ]
         });
     });
 }
