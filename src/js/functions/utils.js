@@ -46,7 +46,7 @@ const get_incomplete_checklist_items = async (card) => {
 
 const create_card_from_checklist_item = async (t, list_id, checklist_item) => {
     
-    const list_response = await fetch(`https://api.trello.com/1/lists/${list_id}/?key=${apiKey}&token=${token}`, {method: 'GET'});
+    const list_response = await fetch(`https://api.trello.com/1/lists/${checklist_item.listId}/?key=${apiKey}&token=${token}`, {method: 'GET'});
     const list = await list_response.json();
 
     if (DEBUG) {
