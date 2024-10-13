@@ -38,7 +38,7 @@ exports.handler = async (event, context) => {
     }
 
     return {
-        statusCode: 405,
+        statusCode: 401,
         body: body,
     };
 };
