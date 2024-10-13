@@ -1,5 +1,13 @@
 // webhook/trelloWebhook.js
 
+const {
+    apiKey,
+    token,
+    VERBOSE,
+    DEBUG,
+} = require('../config');
+
+
 exports.handler = async (event, context) => {
     // Check if the request is a HEAD request (Trello does this for validation)
     if (event.httpMethod === "HEAD") {
@@ -23,8 +31,14 @@ exports.handler = async (event, context) => {
     }
 
     // If the request is not HEAD or POST, return 405 Method Not Allowed
+
+    var body = "Method Not Allowed\n";
+    if (DEBUG) {
+        body += event;
+    }
+
     return {
         statusCode: 405,
-        body: "Method Not Allowed",
+        body: body,
     };
 };

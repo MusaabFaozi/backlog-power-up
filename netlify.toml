@@ -1,7 +1,2 @@
 [functions]
 directory = "src/js/functions"
-
-[[redirects]]
-  from = "/webhook/*"
-  to = "src/js/functions/:splat"
-  status = 200
