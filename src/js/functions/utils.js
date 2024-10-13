@@ -44,6 +44,17 @@ const get_incomplete_checklist_items = async (card) => {
 };
 
 
+/**
+ * Creates a card for a given checklist item in a list.
+ *
+ * @async
+ * @function create_card_from_checklist_item
+ * @param {Class} t - Trello data class.
+ * @param {string} list_id - The ID of the destination list.
+ * @param {Object} checklist_item - Object of checklist item from which the backlog card will be created.
+ * @returns {Object} The object for the created card.
+ * @throws {Error} If the request fails or the response is not 'ok'.
+ */
 const create_card_from_checklist_item = async (t, list_id, checklist_item) => {
     
     const list_response = await fetch(`https://api.trello.com/1/lists/${checklist_item.listId}/?key=${apiKey}&token=${token}`, {method: 'GET'});
