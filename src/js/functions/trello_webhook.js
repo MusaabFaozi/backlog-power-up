@@ -34,7 +34,7 @@ exports.handler = async (event, context) => {
 
     var body = "Method Not Allowed\n";
     if (DEBUG) {
-        body += event;
+        body += JSON.stringify(event);
     }
 
     return {
