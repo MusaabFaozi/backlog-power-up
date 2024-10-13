@@ -62,7 +62,7 @@ const create_card_from_checklist_item = async (t, list_id, checklist_item) => {
         },
         body: JSON.stringify({
             name: `[${checklist_item.cardName}] ${checklist_item.itemName}`,
-            desc: `Originally from card: ${checklist_item.cardName}\nOriginally from List: ${listname}`,
+            desc: `### Card Details:\nTask: ${checklist_item.cardName}\nProject: ${listname}`,
             idList: list_id,
             pos: 'bottom',
             key: apiKey,
