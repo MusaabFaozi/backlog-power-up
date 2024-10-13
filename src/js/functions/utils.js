@@ -38,7 +38,7 @@ const get_incomplete_checklist_items = async (card) => {
     const checklists = await response.json();
     const incomplete_items = checklists.flatMap(checklist => checklist.checkItems)
         .filter(item => item.state === 'incomplete')
-        .map(async item_1 => { return { cardName: card.name, itemName: item_1.name, checklistId: item_1.id, listName: card.listName}});
+        .map(async item_1 => { return { cardName: card.name, itemName: item_1.name, checklistId: item_1.id, listId: card.idList}});
     return incomplete_items;
 };
 
@@ -51,7 +51,7 @@ const create_card_from_checklist_item = async (t, list_id, checklist_item) => {
         },
         body: JSON.stringify({
             name: `[${checklist_item.cardName}] ${checklist_item.itemName}`,
-            desc: `Originally from card: ${checklist_item.cardName}\nOriginally from List: ${checklist_item.listName}`,
+            desc: `Originally from card: ${checklist_item.cardName}\nOriginally from List: ${checklist_item.listId}`,
             idList: list_id,
             pos: 'bottom',
             key: apiKey,
