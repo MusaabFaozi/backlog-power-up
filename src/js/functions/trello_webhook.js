@@ -1,30 +1,30 @@
 // webhook/trelloWebhook.js
 
 exports.handler = async (event, context) => {
-    if (event.httpMethod !== 'POST') {
+    // Check if the request is a HEAD request (Trello does this for validation)
+    if (event.httpMethod === "HEAD") {
         return {
-            statusCode: 405,
-            body: 'Method Not Allowed',
+            statusCode: 200,
+            body: "",
         };
     }
 
-    try {
-        const data = JSON.parse(event.body);
-        console.log('Webhook received:', data);
+    // Handle other HTTP methods (e.g., POST)
+    if (event.httpMethod === "POST") {
+        // Process the incoming Trello webhook payload
+        const payload = JSON.parse(event.body);
 
-        // Handle the webhook payload
-        // For example, you can check action type, card details, etc.
-        // const { action } = data;
+        // Perform your desired actions here
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Webhook processed successfully' }),
-        };
-    } catch (error) {
-        console.error('Error processing webhook:', error);
-        return {
-            statusCode: 500,
-            body: 'Internal Server Error',
+            body: "Webhook received",
         };
     }
+
+    // If the request is not HEAD or POST, return 405 Method Not Allowed
+    return {
+        statusCode: 405,
+        body: "Method Not Allowed",
+    };
 };

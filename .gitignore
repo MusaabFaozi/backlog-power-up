@@ -109,6 +109,7 @@ dist
 
 # Serverless directories
 .serverless/
+.webhook_setup.ps1
 
 # FuseBox cache
 .fusebox/
