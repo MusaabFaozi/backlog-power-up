@@ -10,6 +10,9 @@ const {
 
 exports.handler = async (event, context) => {
 
+    // Log the HTTP method for debugging
+    console.log("HTTP Method Received:", event.httpMethod);
+
     // Normalize the HTTP method to avoid case sensitivity issues
     const httpMethod = event.httpMethod ? event.httpMethod.toUpperCase() : "";
 
