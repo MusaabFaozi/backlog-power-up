@@ -9,8 +9,12 @@ const {
 
 
 exports.handler = async (event, context) => {
+
+    // Normalize the HTTP method to avoid case sensitivity issues
+    const httpMethod = event.httpMethod ? event.httpMethod.toUpperCase() : "";
+
     // Check if the request is a HEAD request (Trello does this for validation)
-    if (event.httpMethod === "HEAD") {
+    if (httpMethod == "HEAD") {
         return {
             statusCode: 200,
             body: "",
@@ -18,7 +22,7 @@ exports.handler = async (event, context) => {
     }
 
     // Handle other HTTP methods (e.g., POST)
-    if (event.httpMethod === "POST") {
+    if (httpMethod == "POST") {
         // Process the incoming Trello webhook payload
         const payload = JSON.parse(event.body);
 
@@ -34,8 +38,8 @@ exports.handler = async (event, context) => {
 
     var body = "Method Not Allowed\n";
     if (DEBUG) {
-        body += event.httpMethod + '\n';
-        body += "Method head comparison: " + event.httpMethod === "HEAD";
+        body += httpMethod + '\n';
+        body += "Method head comparison: " + httpMethod === "HEAD";
         body += JSON.stringify(event);
     }
 
