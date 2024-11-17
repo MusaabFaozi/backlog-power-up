@@ -34,6 +34,8 @@ exports.handler = async (event, context) => {
 
     var body = "Method Not Allowed\n";
     if (DEBUG) {
+        body += event.httpMethod + '\n';
+        body += "Method head comparison: " + event.httpMethod === "HEAD";
         body += JSON.stringify(event);
     }
 
