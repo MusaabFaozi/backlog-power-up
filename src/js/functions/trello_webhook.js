@@ -17,7 +17,7 @@ exports.handler = async (event, context) => {
     const httpMethod = event.httpMethod ? event.httpMethod.toUpperCase() : "";
 
     // Check if the request is a HEAD request (Trello does this for validation)
-    if (httpMethod == "HEAD") {
+    if (httpMethod == "HEAD" || httpMethod == "GET") {
         return {
             statusCode: 200,
             body: "",
@@ -47,7 +47,7 @@ exports.handler = async (event, context) => {
     }
 
     return {
-        statusCode: 200,
+        statusCode: 405,
         body: body,
     };
 };
