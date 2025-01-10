@@ -39,7 +39,13 @@ exports.handler = async (event, context) => {
 
             case "updateCard":
                 // Handle updating an existing card
-                console.log("Card updated:", action.data.card);
+                if (action.data.old && action.data.old.name) {
+                    console.log("Card name changed from:", action.data.old.name, "to:", action.data.card.name);
+                } else if (action.data.listBefore && action.data.listAfter) {
+                    console.log("Card moved from list:", action.data.listBefore.name, "to list:", action.data.listAfter.name);
+                } else {
+                    console.log("Card updated:", action.data.card);
+                }
                 break;
 
             case "deleteCard":
