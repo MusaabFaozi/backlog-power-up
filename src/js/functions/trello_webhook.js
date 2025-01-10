@@ -28,8 +28,44 @@ exports.handler = async (event, context) => {
     if (httpMethod == "POST") {
         // Process the incoming Trello webhook payload
         const payload = JSON.parse(event.body);
+        const action = payload.action;
 
         // Perform your desired actions here
+        switch (action.type) {
+            case "createCard":
+                // Handle adding a new card
+                console.log("Card created:", action.data.card);
+                break;
+
+            case "updateCard":
+                // Handle updating an existing card
+                console.log("Card updated:", action.data.card);
+                break;
+
+            case "deleteCard":
+                // Handle deleting a card
+                console.log("Card deleted:", action.data.card);
+                break;
+            
+            case "createCheckItem":
+                // Handle adding a new checklist item
+                console.log("Checklist item created:", action.data.checkItem);
+                break;
+            
+            case "updateCheckItem":
+                // Handle updating an existing checklist item
+                console.log("Checklist item updated:", action.data.checkItem);
+                break;
+            
+            case "deleteCheckItem":
+                // Handle deleting a checklist item
+                console.log("Checklist item deleted:", action.data.checkItem);
+                break;
+            
+            default:
+                console.log("Unhandled action type:", action.type);
+                break;
+        }
 
         return {
             statusCode: 200,
