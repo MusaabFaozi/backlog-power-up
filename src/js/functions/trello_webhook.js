@@ -64,7 +64,7 @@ exports.handler = async (event, context) => {
                     // Check if the card is not in a default list
                     if (!defaultlists_ids.includes(action.data.card.idList)) {
                         for (const checklist_card of checklist_cards) {
-                            if (checklist_card.name.includes(action.data.card.name)) {
+                            if (checklist_card.name.includes(action.data.old.name)) {
 
                                 // Retrieve custom fields for the card
                                 const custom_fields = await get_custom_fields(board_id, checklist_card.id);
