@@ -38,6 +38,8 @@ const get_lists_by_names = async (board_id, list_names) => {
             method: 'GET'
         });
 
+        console.log("get_lists_by_names: response: ", response);
+
         if (!response.ok) {
             throw new Error(`Failed to fetch lists: ${response.status} ${response.statusText}`);
         }
