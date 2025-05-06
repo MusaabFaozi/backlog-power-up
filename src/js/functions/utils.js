@@ -34,6 +34,9 @@ const get_lists_by_names = async (board_id, list_names) => {
 
     // Fetch all lists from the board
     const fetchListsPromises = list_names.map(async (list_name) => {
+
+        console.log("get_lists_by_names: list_name: ", list_name);
+
         const response = await fetch(`https://api.trello.com/1/boards/${board_id}/lists?key=${apiKey}&token=${token}`, {
             method: 'GET'
         });
