@@ -130,9 +130,13 @@ exports.handler = async (event, context) => {
                 console.log("Card deleted:", action.data.card);
                 break;
             
-            case "createCheckItem":
+            case "addChecklistToCard":
+
                 // Handle adding a new checklist item
-                console.log("Checklist item created:", action.data.checkItem);
+                console.log("addChecklistToCard: Checklist item created:", action.data.checkItem);
+                
+                // Get the card ID and board ID
+                
                 break;
             
             case "updateCheckItem":
