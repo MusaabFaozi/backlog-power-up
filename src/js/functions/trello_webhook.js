@@ -46,14 +46,14 @@ exports.handler = async (event, context) => {
 
                 // Handle adding a new card
                 console.log("New card created:", action.data.card.name);
-                const card_id = action.data.card.id;
-                const card_board_id = action.data.card.idBoard;
+                const created_card_id = action.data.card.id;
+                const created_card_board_id = action.data.card.idBoard;
                 
-                const card_checklist_items = await get_incomplete_checklist_items(card_id);
+                const card_checklist_items = await get_incomplete_checklist_items(created_card_id);
                 if (card_checklist_items && card_checklist_items.length > 0) {
 
                     // Get the backlog list ID
-                    const backlog_list = await get_lists_by_names(card_board_id, [BACKLOG_LIST_NAME]);
+                    const backlog_list = await get_lists_by_names(created_card_board_id, [BACKLOG_LIST_NAME]);
                     const backlog_list_id = backlog_list[0].id;
                     
                     const createCardPromises = card_checklist_items.map(async (checklist_item) => {
@@ -135,8 +135,8 @@ exports.handler = async (event, context) => {
                 console.log("createCheckItem: Checklist item created:", action.data.checkItem);
 
                 // Get the card ID and board ID
-                const card_id = action.data.card.id;
-                console.log("New Checklist item Card ID:", card_id);
+                const checklist_card_id = action.data.card.id;
+                console.log("New Checklist item Card ID:", checklist_card_id);
 
                 break;
             
