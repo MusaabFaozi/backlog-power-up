@@ -312,7 +312,8 @@ const handle_checklist_item_creation = async (action_data) => {
     // Get the card ID and board ID
     const board_id = action_data.board.id;
     const checklist_card_id = action_data.card.id;
-    const backlog_list_id = get_lists_by_names(board_id, [BACKLOG_LIST_NAME]).map(list => list.id)[0];
+    const backlog_list = get_lists_by_names(board_id, [BACKLOG_LIST_NAME]);
+    const backlog_list_id = backlog_list[0].id;
     
     console.log("createCheckItem: New Checklist item Board ID:", board_id);
     console.log("createCheckItem: New Checklist item Card ID:", checklist_card_id);
