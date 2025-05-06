@@ -76,7 +76,6 @@ const get_incomplete_checklist_items = async (card) => {
  *
  * @async
  * @function create_card_from_checklist_item
- * @param {Class} t - Trello data class.
  * @param {string} list_id - The ID of the destination list.
  * @param {Object} checklist_item - Object of checklist item from which the backlog card will be created.
  * @returns {Object} The object for the created card.

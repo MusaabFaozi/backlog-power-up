@@ -123,6 +123,9 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
+# GitHub Copilot
+examples/
+
 # yarn v2
 .yarn/cache
 .yarn/unplugged

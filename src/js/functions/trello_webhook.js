@@ -33,17 +33,42 @@ exports.handler = async (event, context) => {
         };
     }
 
-    // Handle other HTTP methods (e.g., POST)
+    // Handle core functionality for POST requests (Trello webhook payloads)
     if (httpMethod == "POST") {
+
         // Process the incoming Trello webhook payload
         const payload = JSON.parse(event.body);
         const action = payload.action;
 
-        // Perform your desired actions here
+        // Check if the action is valid
         switch (action.type) {
             case "createCard":
+
                 // Handle adding a new card
-                console.log("Card created:", action.data.card);
+                console.log("New card created:", action.data.card.name);
+                const card_id = action.data.card.id;
+                const card_board_id = action.data.card.idBoard;
+                
+                const card_checklist_items = await get_incomplete_checklist_items(card_id);
+                if (card_checklist_items && card_checklist_items.length > 0) {
+
+                    // Get the backlog list ID
+                    const backlog_list = await get_lists_by_names(card_board_id, [BACKLOG_LIST_NAME]);
+                    const backlog_list_id = backlog_list[0].id;
+                    
+                    const createCardPromises = card_checklist_items.map(async (checklist_item) => {
+                        const new_card = await create_card_from_checklist_item(backlog_list_id, checklist_item);
+                        if (new_card) {
+                            console.log("New card created from checklist item:", new_card.name);
+                        } else {
+                            console.log("Failed to create card from checklist item:", checklist_item.name);
+                        }
+
+                        return new_card;
+                    });
+
+                    await Promise.all(createCardPromises);
+                }
                 break;
 
             case "updateCard":
