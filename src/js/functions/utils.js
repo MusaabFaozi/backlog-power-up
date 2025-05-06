@@ -42,7 +42,7 @@ const get_lists_by_names = async (board_id, list_names) => {
             }
 
             const lists = await response.json();
-            return lists.find(list => list.name === list_name);
+            return lists.find(list => list.name.toLowerCase() === list_name);
         } catch (error) {
             console.error(`Error fetching list "${list_name}":`, error.message);
             return undefined;
