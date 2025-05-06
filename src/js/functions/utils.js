@@ -341,14 +341,13 @@ const delete_all_cards_in_lists = async (list_ids) => {
  */
 const handle_checklist_item_creation = async (action_data) => {
     console.log("createCheckItem: Checklist item created:", action_data.checkItem);
+    console.log("source list id: ", action_data.list.id);
 
     // Get the card ID and board ID
     const board_id = action_data.board.id;
     const checklist_card_id = action_data.card.id;
     const backlog_list = await get_lists_by_names(board_id, [BACKLOG_LIST_NAME]);
     const backlog_list_id = backlog_list[0].id;
-
-    console.log("source list id: ", action_data.list.id);
 
     const checklist_item = action_data.checkItem;    
     // Get the card details
