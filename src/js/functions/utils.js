@@ -103,6 +103,16 @@ const get_incomplete_checklist_items = async (card) => {
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
 const create_card_from_checklist_item = async (list_id, checklist_item) => {
+
+    // Validate the input parameters
+    if (!list_id || !checklist_item) {
+        throw new Error("list_id and checklist_item must be provided.");
+    }
+
+    if (DEBUG) {
+        console.log("checklist_item: ", checklist_item);
+        console.log("checklist_item.listId: ", checklist_item.listId);
+    }
     
     // Get the list name
     const list_response = await fetch(`https://api.trello.com/1/lists/${checklist_item.listId}/?key=${apiKey}&token=${token}`, {method: 'GET'});
