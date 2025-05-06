@@ -34,42 +34,17 @@ exports.handler = async (event, context) => {
         };
     }
 
-    // Handle core functionality for POST requests (Trello webhook payloads)
+    // Handle other HTTP methods (e.g., POST)
     if (httpMethod == "POST") {
-
         // Process the incoming Trello webhook payload
         const payload = JSON.parse(event.body);
         const action = payload.action;
 
-        // Check if the action is valid
+        // Perform your desired actions here
         switch (action.type) {
             case "createCard":
-
                 // Handle adding a new card
-                console.log("New card created:", action.data.card.name);
-                const created_card_id = action.data.card.id;
-                const created_card_board_id = action.data.card.idBoard;
-                
-                const card_checklist_items = await get_incomplete_checklist_items(created_card_id);
-                if (card_checklist_items && card_checklist_items.length > 0) {
-
-                    // Get the backlog list ID
-                    const backlog_list = await get_lists_by_names(created_card_board_id, [BACKLOG_LIST_NAME]);
-                    const backlog_list_id = backlog_list[0].id;
-                    
-                    const createCardPromises = card_checklist_items.map(async (checklist_item) => {
-                        const new_card = await create_card_from_checklist_item(backlog_list_id, checklist_item);
-                        if (new_card) {
-                            console.log("New card created from checklist item:", new_card.name);
-                        } else {
-                            console.log("Failed to create card from checklist item:", checklist_item.name);
-                        }
-
-                        return new_card;
-                    });
-
-                    await Promise.all(createCardPromises);
-                }
+                console.log("Card created:", action.data.card);
                 break;
 
             case "updateCard":
@@ -82,7 +57,8 @@ exports.handler = async (event, context) => {
                     const defaultlist_names = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
 
                     // Get incomplete checklist items and default list IDs
-                    const defaultlists_ids = get_lists_by_names(board_id, defaultlist_names).map(list => list.id);
+                    const defaultlists = get_lists_by_names(board_id, defaultlist_names);
+                    const defaultlists_ids = defaultlists.map(list => list.id);
                     
                     // Get cards in default lists
                     const checklist_cards = await get_cards_in_lists(worklists_ids);
