@@ -29,21 +29,18 @@ const get_lists_by_names = async (board_id, list_names) => {
         throw new Error("list_names must be a non-empty array of strings.");
     }
 
-    console.log("get_lists_by_names: board_id: ", board_id);
-    console.log("get_lists_by_names: list_names: ", list_names);
-
     // Fetch all lists from the board
     const fetchListsPromises = list_names.map(async (list_name) => {
-
-        console.log("get_lists_by_names: list_name: ", list_name);
 
         const response = await fetch(`https://api.trello.com/1/boards/${board_id}/lists?key=${apiKey}&token=${token}`, {
             method: 'GET'
         });
 
+        console.log("get_lists_by_names: test");
         console.log("get_lists_by_names: response: ", response);
-
-        if (!response.ok) {
+        
+        response_status = await response.ok;
+        if (!response_status) {
             throw new Error(`Failed to fetch lists: ${response.status} ${response.statusText}`);
         }
 
