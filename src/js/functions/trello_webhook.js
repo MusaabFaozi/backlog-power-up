@@ -13,7 +13,8 @@ const {
     get_cards_in_lists,
     get_incomplete_checklist_items,
     get_custom_fields,
-    update_card_name
+    update_card_name,
+    handle_checklist_item_creation
  } = require('./utils');
 
 
@@ -134,9 +135,8 @@ exports.handler = async (event, context) => {
                 // Handle adding a new checklist item
                 console.log("createCheckItem: Checklist item created:", action.data.checkItem);
 
-                // Get the card ID and board ID
-                const checklist_card_id = action.data.card.id;
-                console.log("New Checklist item Card ID:", checklist_card_id);
+                // Call the handler function
+                await handle_checklist_item_creation(action.data);
 
                 break;
             

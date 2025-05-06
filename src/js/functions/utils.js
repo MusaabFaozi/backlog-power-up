@@ -327,6 +327,7 @@ const handle_checklist_item_creation = async (action_data) => {
     }
 
     return card;
+}
 
 module.exports = {
     get_lists_by_names,
@@ -339,5 +340,5 @@ module.exports = {
     set_card_description,
     delete_card,
     delete_all_cards_in_lists,
-    
+    handle_checklist_item_creation,
 };
