@@ -45,10 +45,16 @@ const get_lists_by_names = async (board_id, list_names) => {
         }
 
         const lists = await response.json();
+
+        console.log("get_lists_by_names: lists: ", lists);
+
         return lists.find(list => list.name === list_name);
     });
 
     const fetchedLists = await Promise.all(fetchListsPromises);
+
+    console.log("get_lists_by_names: fetchedLists: ", fetchedLists);
+
     return fetchedLists.filter(list => list !== undefined);
 };
 
