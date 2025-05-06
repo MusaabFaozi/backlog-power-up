@@ -6,6 +6,12 @@ const {
     DEBUG,
 } = require('../config');
 
+
+/**
+ * Get board ID from C
+ */
+
+
 /**
  * Retrieves all lists with specific names.
  *
@@ -208,6 +214,7 @@ const set_custom_fields = async (card_id, custom_fields) => {
     return Promise.all(custom_field_promises);
 };
 
+
 /**
  * Retrieves custom fields for a card.
  *
@@ -229,6 +236,7 @@ const get_custom_fields = async (card_id) => {
     const custom_fields = await response.json();
     return custom_fields;
 };
+
 
 /**
  * Sets the description for a card.
@@ -299,6 +307,7 @@ const delete_all_cards_in_lists = async (list_ids) => {
     return Promise.all(card_delete_promises);
 };
 
+
 /**
  * Handles checklist item creation.
  * 
@@ -311,7 +320,7 @@ const handle_checklist_item_creation = async (action_data) => {
 
     // Get the card ID and board ID
     const board_id = action_data.card.idBoard;
-    console.log("createCheckItem: New Checklist item Card:", action_data.card);
+    console.log("createCheckItem: New Checklist item Action data:", action_data);
 
     const checklist_card_id = action_data.card.id;
     console.log("createCheckItem: New Checklist item Card ID:", checklist_card_id);
