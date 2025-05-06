@@ -1,6 +1,7 @@
 const {
     apiKey,
     token,
+    BACKLOG_LIST_NAME,
     VERBOSE,
     DEBUG,
 } = require('../config');
@@ -297,6 +298,35 @@ const delete_all_cards_in_lists = async (list_ids) => {
 
     return Promise.all(card_delete_promises);
 };
+
+/**
+ * Handles checklist item creation.
+ * 
+ * @async
+ * @function handle_checklist_item_creation
+ * 
+ */
+const handle_checklist_item_creation = async (action_data) => {
+    console.log("createCheckItem: Checklist item created:", action_data.checkItem);
+
+    // Get the card ID and board ID
+    const board_id = action_data.board.id;
+    const checklist_card_id = action_data.card.id;
+    const backlog_list_id = get_lists_by_names(board_id, [BACKLOG_LIST_NAME]).map(list => list.id)[0];
+    
+    console.log("createCheckItem: New Checklist item Board ID:", board_id);
+    console.log("createCheckItem: New Checklist item Card ID:", checklist_card_id);
+    console.log("createCheckItem: New Checklist item Backlog List ID:", backlog_list_id);
+    
+    // Get the card details
+    const new_card = await create_card_from_checklist_item(backlog_list_id, checklist_item);
+    if (new_card) {
+        console.log("New card created from checklist item:", new_card.name);
+    } else {
+        console.log("Failed to create card from checklist item:", checklist_item.name);
+    }
+
+    return card;
 
 module.exports = {
     get_lists_by_names,
