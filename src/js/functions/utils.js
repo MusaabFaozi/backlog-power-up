@@ -23,22 +23,28 @@ const {
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
 const get_lists_by_names = async (board_id, list_names) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const response = await fetch(`https://api.trello.com/1/boards/${board_id}/lists?key=${apiKey}&token=${token}`, {
-                method: 'GET'
-            });
 
-            if (!response.ok) {
-                throw new Error(`Failed to fetch lists: ${response.status} ${response.statusText}`);
-            }
+    // Validate the input parameters
+    if (!Array.isArray(list_names) || list_names.length === 0) {
+        throw new Error("list_names must be a non-empty array of strings.");
+    }
 
-            const lists = await response.json();
-            resolve(lists.filter(list => list_names.includes(list.name)));
-        } catch (error) {
-            reject(error);
+    // Fetch all lists from the board
+    const fetchListsPromises = list_names.map(async (list_name) => {
+        const response = await fetch(`https://api.trello.com/1/boards/${board_id}/lists?key=${apiKey}&token=${token}`, {
+            method: 'GET'
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch lists: ${response.status} ${response.statusText}`);
         }
+
+        const lists = await response.json();
+        return lists.find(list => list.name === list_name);
     });
+
+    const fetchedLists = await Promise.all(fetchListsPromises);
+    return fetchedLists.filter(list => list !== undefined);
 };
 
 // Get all cards in certain lists
