@@ -348,6 +348,8 @@ const handle_checklist_item_creation = async (action_data) => {
     const backlog_list = await get_lists_by_names(board_id, [BACKLOG_LIST_NAME]);
     const backlog_list_id = backlog_list[0].id;
 
+    console.log("source list id: ", action_data.list.id);
+
     const checklist_item = action_data.checkItem;    
     // Get the card details
     const new_card = await create_card_from_checklist_item(backlog_list_id, checklist_item);
