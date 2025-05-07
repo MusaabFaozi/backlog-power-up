@@ -343,6 +343,10 @@ const set_hidden_data = async (card_id, hidden_data) => {
 
     const response = await set_card_description(card_id, updated_desc);
 
+    if (DEBUG) {
+        console.log("set_card_description response: ", response);
+    }
+
     return response.ok;
 };
 
@@ -399,6 +403,9 @@ const get_hidden_data = async (card_id) => {
 const set_card_description = async (card_id, description) => {
     const response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
         method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ desc: description })
     });
 
