@@ -341,7 +341,7 @@ const delete_all_cards_in_lists = async (list_ids) => {
  */
 const handle_checklist_item_creation = async (action_data) => {
     console.log("createCheckItem: Checklist item created:", action_data.checkItem);
-    console.log("source list: ", action_data.list);
+    console.log("source card: ", action_data.card);
 
     // Get the card ID and board ID
     const board_id = action_data.board.id;
