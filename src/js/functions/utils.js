@@ -336,6 +336,11 @@ const set_hidden_data = async (card_id, hidden_data) => {
 
     // Add the new hidden data to the card description
     updated_desc += `\n\n\n<!-- Hidden Data: {${encoded_hidden_data}} -->`;
+
+    if (DEBUG) {
+        console.log("updated_desc: ", updated_desc);
+    }
+
     const response = await set_card_description(card_id, updated_desc);
 
     return response.ok;
@@ -386,6 +391,8 @@ const set_card_description = async (card_id, description) => {
     } else {
         console.error(`Error setting description for card ${card_id}:`, response.statusText);
     }
+
+    return response;
 }
 
 
