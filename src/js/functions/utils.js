@@ -249,30 +249,30 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
         console.log(`Created a new card with id: ${backlog_card_id}`);
     }
 
-    // Set the custom fields for the created card
-    const custom_fields = {
+    // Set the hidden data for the created card
+    const hidden_data = {
         'TaskName': card_name,
         'TaskID': card_id,
         'ProjectName': list_name,
         'CheckItemID': checklist_item.id,
     }
 
-    // Set the custom fields for the created card
-    const custom_fields_response = await set_hidden_data(backlog_card_id, custom_fields);
+    // Set the hidden data for the created card
+    const hidden_data_response = await set_hidden_data(backlog_card_id, hidden_data);
 
-    // Check if the custom fields are set successfully
-    if (custom_fields_response) {
+    // Check if the hidden data are set successfully
+    if (hidden_data_response) {
         if (VERBOSE) {
-            console.log(`Custom fields set successfully for card ${backlog_card_id}`);
+            console.log(`Hidden data set successfully for card ${backlog_card_id}`);
         }
     } else {
-        throw new Error(`Failed to set custom fields for card ${backlog_card_id}`);
+        throw new Error(`Failed to set hidden data for card ${backlog_card_id}`);
     }
 
     // DEBUG ONLY
     if (DEBUG) {
-        const check_custom_fields = await get_custom_fields(backlog_card_id);
-        console.log("check_custom_fields: ", check_custom_fields);
+        const check_hidden_data = await get_hidden_data(backlog_card_id);
+        console.log("check_hidden_data: ", check_hidden_data);
     }
 
     return backlog_card;
@@ -303,12 +303,12 @@ const update_card_name = async (card_id, new_name) => {
 
 
 /**
- * Sets custom fields for a card.
+ * Sets Hidden data for a card.
  *
  * @async
  * @function set_hidden_data
  * @param {string} card_id - The ID of the card.
- * @param {Object} hidden_data - An object containing custom field names and their values.
+ * @param {Object} hidden_data - An object containing hidden meta data names and their values.
  * @returns {Promise<boolean>} A promise that resolves to true if the operation was successful, false otherwise.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
@@ -348,25 +348,41 @@ const set_hidden_data = async (card_id, hidden_data) => {
 
 
 /**
- * Retrieves custom fields for a card.
+ * Retrieves hidden data for a card.
  *
  * @async
- * @function get_custom_fields
+ * @function get_hidden_data
  * @param {string} card_id - The ID of the card.
- * @returns {Promise<Array<Object>>} A promise that resolves to an array of custom fields.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an Object of hidden data.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
-const get_custom_fields = async (card_id) => {
-    const response = await fetch(`https://api.trello.com/1/cards/${card_id}/customFieldItems?key=${apiKey}&token=${token}`, {
+const get_hidden_data = async (card_id) => {
+    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
         method: 'GET'
     });
 
-    if (!response.ok) {
-        throw new Error(`Failed to fetch custom fields: ${response.status} ${response.statusText}`);
+    const card = await response.json();
+    if (!card) {
+        throw new Error(`Failed to fetch card details: ${response.status} ${response.statusText}`);
     }
 
-    const custom_fields = await response.json();
-    return custom_fields;
+    const hidden_data_match = card.desc.match(HIDDEN_DATA_REGEX);
+    if (!hidden_data_match) {
+        return null; // No hidden data found
+    }
+
+    const encoded_hidden_data = hidden_data_match[0].substring(
+        hidden_data_match[0].indexOf('{') + 1,
+        hidden_data_match[0].indexOf('}')
+    );
+
+    const hidden_data = JSON.parse(atob(encoded_hidden_data));
+
+    if (DEBUG) {
+        console.log("hidden_data: ", hidden_data);
+    }
+
+    return hidden_data;
 };
 
 
@@ -480,7 +496,6 @@ module.exports = {
     backlog_checklist_item,
     update_card_name,
     set_hidden_data,
-    get_custom_fields,
     set_card_description,
     delete_card,
     delete_all_cards_in_lists,
