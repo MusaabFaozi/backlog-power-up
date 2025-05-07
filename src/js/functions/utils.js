@@ -180,8 +180,8 @@ const get_incomplete_checklist_items = async (card) => {
 const backlog_checklist_item = async (card_id, checklist_item) => {
 
     // Validate the input parameters
-    if (!board_id || !checklist_item) {
-        throw new Error("board_id and checklist_item must be provided.");
+    if (!card_id || !checklist_item) {
+        throw new Error("card_id and checklist_item must be provided.");
     }
 
     if (DEBUG) {
