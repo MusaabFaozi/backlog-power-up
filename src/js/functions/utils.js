@@ -426,7 +426,7 @@ const handle_checklist_item_creation = async (action_data) => {
         method: 'GET'
     });
 
-    const checklist_item = await checklist_item_full.json();
+    const checklist_item = await checklist_item_full.text();
     if (DEBUG) {
         console.log("checklist_item_full: ", checklist_item_full);
     }
