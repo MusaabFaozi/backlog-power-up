@@ -227,7 +227,7 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
             name: `[${card_name}] ${checklist_item.name}`,
             desc: `### Card Details:\nTask: ${card_name}\nProject: ${list_name}`,
             idList: backlog_list_id,
-            pos: 'bottom',
+            pos: 'top',
             key: apiKey,
             token: token
         })
@@ -376,8 +376,9 @@ const get_custom_fields = async (card_id) => {
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
 const set_card_description = async (card_id, description) => {
-    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?desc=${description}&key=${apiKey}&token=${token}`, {
-        method: 'PUT'
+    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
+        method: 'PUT',
+        body: JSON.stringify({ desc: description })
     });
 
     if (response.ok && VERBOSE) {
