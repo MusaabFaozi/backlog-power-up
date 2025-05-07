@@ -422,13 +422,13 @@ const handle_checklist_item_creation = async (action_data) => {
     const checklist_item_id = action_data.checkItem.id;
     
     // Get checklist item details
-    const checklist_item_full = await fetch(`https://api.trello.com/1/cards/${action_data.card.id}/checkItems/${checklist_item_id}?key=${apiKey}&token=${token}`, {
+    const card_response = await fetch(`https://api.trello.com/1/cards/${action_data.card.id}?key=${apiKey}&token=${token}`, {
         method: 'GET'
     });
 
-    const checklist_item = await checklist_item_full.text();
+    const card_full = await card_response.text();
     if (DEBUG) {
-        console.log("checklist_item_full: ", checklist_item_full);
+        console.log("card_full: ", card_full);
     }
 
     // Get the card details
