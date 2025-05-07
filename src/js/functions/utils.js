@@ -336,6 +336,11 @@ const set_hidden_data = async (card_id, hidden_data) => {
 
     // Add the new hidden data to the card description
     updated_desc += `\n\n\n<!-- Hidden Data: {${encoded_hidden_data}} -->`;
+
+    if (DEBUG) {
+        console.log("updated_desc: ", updated_desc);
+    }
+
     const response = await fetch(`https://api.trello.com/1/cards/${card_id}?desc=${updated_desc}&key=${apiKey}&token=${token}`, {
         method: 'PUT'
     });
