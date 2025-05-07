@@ -236,16 +236,16 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
     if (!response.ok) {
         throw new Error(`Failed to create card: ${response.status} ${response.statusText}`);
     }
-    const card = await response.json();
+    const backlog_card = await response.json();
 
     if (DEBUG) {
-        console.log("card: ", card);
+        console.log("card: ", backlog_card);
     }
 
-    const card_id = card.id;
+    const backlog_card_id = backlog_card.id;
 
     if (VERBOSE) {
-        console.log(`Created a new card with id: ${card_id}`);
+        console.log(`Created a new card with id: ${backlog_card_id}`);
     }
 
     // Set the custom fields for the created card
@@ -257,18 +257,18 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
     }
 
     // Set the custom fields for the created card
-    const custom_fields_response = await set_custom_fields(card_id, custom_fields);
+    const custom_fields_response = await set_custom_fields(backlog_card_id, custom_fields);
 
     // Check if the custom fields are set successfully
     if (custom_fields_response) {
         if (VERBOSE) {
-            console.log(`Custom fields set successfully for card ${card_id}`);
+            console.log(`Custom fields set successfully for card ${backlog_card_id}`);
         }
     } else {
-        throw new Error(`Failed to set custom fields for card ${card_id}`);
+        throw new Error(`Failed to set custom fields for card ${backlog_card_id}`);
     }
 
-    return card;
+    return backlog_card;
 }
 
 
