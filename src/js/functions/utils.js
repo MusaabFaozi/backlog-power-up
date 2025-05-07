@@ -172,12 +172,12 @@ const get_incomplete_checklist_items = async (card) => {
  *
  * @async
  * @function backlog_checklist_item
- * @param {string} board_id - The ID of the board.
+ * @param {string} card_id - The ID of the Check Item source Card.
  * @param {Object} checklist_item - Object of checklist item from which the backlog card will be created.
  * @returns {Object} The object for the created card.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
-const backlog_checklist_item = async (board_id, checklist_item) => {
+const backlog_checklist_item = async (card_id, checklist_item) => {
 
     // Validate the input parameters
     if (!board_id || !checklist_item) {
@@ -188,15 +188,33 @@ const backlog_checklist_item = async (board_id, checklist_item) => {
         console.log("checklist_item: ", checklist_item);
     }
     
-    // Get the list name
-    const list_response = await fetch(`https://api.trello.com/1/lists/${checklist_item.listId}/?key=${apiKey}&token=${token}`, {method: 'GET'});
-    const list = await list_response.json();
+    // Get the source Card details
+    const card_response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
+        method: 'GET'
+    });
 
-    if (DEBUG) {
-        console.log("list: ", list);
+    if (!card_response.ok) {
+        throw new Error(`Failed to fetch card details: ${card_response.status} ${card_response.statusText}`);
+    }
+    const source_card = await card_response.json();
+
+    // Unpack the card details
+    const card_name = source_card.name;
+    const board_id = source_card.idBoard;
+
+    // Get the backlog list ID
+    const backlog_list_id = await get_board_backlog_list_id(board_id);
+    if (!backlog_list_id) {
+        throw new Error(`Failed to fetch backlog list ID for board ${board_id}`);
     }
 
-    const listname = list.name;
+    // Get the list name
+    const list = await get_list_from_card_id(card_id);
+    if (!list) {
+        throw new Error(`Failed to fetch list for card ${card_id}`);
+    }
+    
+    const list_name = list.name;
     
     // Create a new card
     const response = await fetch(`https://api.trello.com/1/cards`, {
@@ -205,9 +223,9 @@ const backlog_checklist_item = async (board_id, checklist_item) => {
         'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            name: `[${checklist_item.cardName}] ${checklist_item.itemName}`,
-            desc: `### Card Details:\nTask: ${checklist_item.cardName}\nProject: ${listname}`,
-            idList: list_id,
+            name: `[${card_name}] ${checklist_item.name}`,
+            desc: `### Card Details:\nTask: ${card_name}\nProject: ${list_name}`,
+            idList: backlog_list_id,
             pos: 'bottom',
             key: apiKey,
             token: token
@@ -218,7 +236,6 @@ const backlog_checklist_item = async (board_id, checklist_item) => {
     if (!response.ok) {
         throw new Error(`Failed to create card: ${response.status} ${response.statusText}`);
     }
-    
     const card = await response.json();
 
     if (DEBUG) {
@@ -233,9 +250,9 @@ const backlog_checklist_item = async (board_id, checklist_item) => {
 
     // Set the custom fields for the created card
     const custom_fields = {
-        'Task Name': checklist_item.cardName,
-        'Task ID': checklist_item.cardId,
-        'Project Name': listname,
+        'Task Name': card_name,
+        'Task ID': card_id,
+        'Project Name': list_name,
         'Checklist Item ID': checklist_item.id,
     }
 
@@ -416,25 +433,19 @@ const delete_all_cards_in_lists = async (list_ids) => {
  */
 const handle_checklist_item_creation = async (action_data) => {
 
-    // Get the board ID
-    const board_id = action_data.board.id;
+    // Unpack the action data
+    const card_id = action_data.card.id;
+    const checklist_item = action_data.checkItem;
 
-    const checklist_item_id = action_data.checkItem.id;
-    
-    // Get checklist item details
-    const card_response = await fetch(`https://api.trello.com/1/cards/${action_data.card.id}?key=${apiKey}&token=${token}`, {
-        method: 'GET'
-    });
-
-    const card_full = await card_response.text();
-    if (DEBUG) {
-        console.log("card_full: ", card_full);
+    // Check if the checklist item is already complete
+    if (checklist_item.state === 'complete') {
+        console.log("Checklist item is complete:", checklist_item.name);
+        return;
     }
 
-    // Get the card details
-    const new_card = await backlog_checklist_item(board_id, checklist_item);
-    if (new_card) {
-        console.log("New card created from checklist item:", new_card.name);
+    const card = await backlog_checklist_item(card_id, checklist_item);
+    if (card) {
+        console.log("New card created from checklist item:", card.name);
     } else {
         console.log("Failed to create card from checklist item:", checklist_item.name);
     }
