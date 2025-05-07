@@ -336,18 +336,7 @@ const set_hidden_data = async (card_id, hidden_data) => {
 
     // Add the new hidden data to the card description
     updated_desc += `\n\n\n<!-- Hidden Data: {${encoded_hidden_data}} -->`;
-
-    if (DEBUG) {
-        console.log("updated_desc: ", updated_desc);
-    }
-
-    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?desc=${updated_desc}&key=${apiKey}&token=${token}`, {
-        method: 'PUT'
-    });
-
-    if (DEBUG) {
-        console.log("response.ok: ", response.ok);
-    }
+    const response = await set_card_description(card_id, updated_desc);
 
     return response.ok;
 };
@@ -374,6 +363,29 @@ const get_custom_fields = async (card_id) => {
     const custom_fields = await response.json();
     return custom_fields;
 };
+
+
+/**
+ * Sets the description for a card.
+ *
+ * @async
+ * @function set_card_description
+ * @param {string} card_id - The ID of the card.
+ * @param {string} description - The description to set for the card.
+ * @returns {Promise<void>} A promise that resolves when the description is set.
+ * @throws {Error} If the request fails or the response is not 'ok'.
+ */
+const set_card_description = async (card_id, description) => {
+    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?desc=${description}&key=${apiKey}&token=${token}`, {
+        method: 'PUT'
+    });
+
+    if (response.ok && VERBOSE) {
+        console.log(`Description set for card ${card_id}`);
+    } else {
+        console.error(`Error setting description for card ${card_id}:`, response.statusText);
+    }
+}
 
 
 /**
@@ -461,6 +473,7 @@ module.exports = {
     update_card_name,
     set_hidden_data,
     get_custom_fields,
+    set_card_description,
     delete_card,
     delete_all_cards_in_lists,
     handle_checklist_item_creation,
