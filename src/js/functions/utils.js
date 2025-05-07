@@ -2,6 +2,7 @@ const {
     apiKey,
     token,
     BACKLOG_LIST_NAME,
+    HIDDEN_DATA_REGEX,
     VERBOSE,
     DEBUG,
 } = require('../config');
@@ -305,34 +306,41 @@ const update_card_name = async (card_id, new_name) => {
  * Sets custom fields for a card.
  *
  * @async
- * @function set_custom_fields
+ * @function set_hidden_data
  * @param {string} card_id - The ID of the card.
- * @param {Object} custom_fields - An object containing custom field names and their values.
- * @returns {Promise<void>} A promise that resolves when all custom fields are set.
+ * @param {Object} hidden_data - An object containing custom field names and their values.
+ * @returns {Promise<boolean>} A promise that resolves to true if the operation was successful, false otherwise.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
-const set_custom_fields = async (card_id, custom_fields) => {
-    const custom_field_promises = Object.entries(custom_fields).map(async ([field_name, field_value]) => {
-        const response = await fetch(`https://api.trello.com/1/card/${card_id}/customField/${field_name}/item?key=${apiKey}&token=${token}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                value: {
-                    text: field_value
-                }
-            })
-        });
+const set_hidden_data = async (card_id, hidden_data) => {
 
-        if (response.ok && VERBOSE) {
-            console.log(`Custom field ${field_name} set to ${field_value} for card ${card_id}`);
-        } else {
-            console.error(`Error setting custom field ${field_name} for card ${card_id}:`, response.statusText);
-        }
+    // Validate the input parameters
+    if (!card_id || !hidden_data) {
+        throw new Error("card_id and hidden_data must be provided.");
+    }
+
+    const card_response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`)
+    if (!card_response.ok) {
+        throw new Error(`Failed to fetch card details: ${response.status} ${response.statusText}`);
+    }
+    const card = await card_response.json();
+
+    // Get card description
+    const card_desc = card.desc || '';
+
+    // Delete the existing hidden data from the card description if it exists
+    let updated_desc = card_desc.replace(HIDDEN_DATA_REGEX, '');
+    
+    // Encode the hidden data as a JSON string in base64 format
+    const encoded_hidden_data = btoa(JSON.stringify(hidden_data));
+
+    // Add the new hidden data to the card description
+    updated_desc += `\n\n\n<!-- Hidden Data: {${encoded_hidden_data}} -->`;
+    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?desc=${updated_desc}&key=${apiKey}&token=${token}`, {
+        method: 'PUT'
     });
 
-    return Promise.all(custom_field_promises);
+    return response.ok;
 };
 
 
