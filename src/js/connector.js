@@ -1,8 +1,8 @@
 
 const {
     get_incomplete_checklist_items,
-    create_card_from_checklist_item,
     delete_all_cards_in_lists,
+    backlog_checklist_item,
 } = require('./functions/utils');
 
 const {
@@ -85,7 +85,7 @@ const backlog_all = async (t) => {
     // Create a new card in the Backlog for each incomplete checklist item
     const create_card_promises = incomplete_checklist_items.map(checklist_item => {
         console.log("checklist_item: ", checklist_item.cardName);
-        return create_card_from_checklist_item(backlog_list_id, checklist_item);
+        return backlog_checklist_item(checklist_item.idCard, checklist_item);
     });
 
     if (DEBUG) {
