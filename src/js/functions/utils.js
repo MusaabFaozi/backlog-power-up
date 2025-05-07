@@ -330,7 +330,7 @@ const set_meta_data = async (card_id, meta_data) => {
     const card_desc = card.desc || '';
 
     // Delete the existing meta data from the card description if it exists
-    let updated_desc = card_desc.replace(HIDDEN_DATA_REGEX, '');
+    let updated_desc = card_desc.replace(META_DATA_REGEX, '');
     
     // Encode the meta data as a JSON string in base64 format
     const encoded_meta_data = btoa(JSON.stringify(meta_data));
@@ -371,7 +371,7 @@ const get_meta_data = async (card_id) => {
         throw new Error(`Failed to fetch card details: ${response.status} ${response.statusText}`);
     }
 
-    const meta_data_match = card.desc.match(HIDDEN_DATA_REGEX);
+    const meta_data_match = card.desc.match(META_DATA_REGEX);
     if (!meta_data_match) {
         return null; // No meta data found
     }
