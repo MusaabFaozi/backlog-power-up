@@ -8,9 +8,34 @@ const {
 
 
 /**
- * Get board ID from C
+ * 
+ * @async
+ * @function get_board_backlog_list_id
+ * @description Retrieves the ID of the backlog list for a given board.
+ * @param {string} board_id - The ID of the board.
+ * @returns {string} The ID of the backlog list.
+ * @throws {Error} If the board ID is not provided or if the list is not found.
  */
+const get_board_backlog_list_id = async (board_id) => {
 
+    // Validate the input parameters
+    if (!board_id) {
+        throw new Error("board_id must be provided.");
+    }
+
+    // Fetch all lists from the board
+    const backlog_list = await get_lists_by_names(board_id, [BACKLOG_LIST_NAME]);
+    if (backlog_list.length === 0) {
+        throw new Error(`No list found with the name "${BACKLOG_LIST_NAME}" on board ${board_id}.`);
+    }
+
+    const backlog_list_id = backlog_list[0].id;
+    if (DEBUG) {
+        console.log("backlog_list_id: ", backlog_list_id);
+    }
+
+    return backlog_list_id;
+}
 
 /**
  * Retrieves all lists with specific names.
@@ -55,7 +80,14 @@ const get_lists_by_names = async (board_id, list_names) => {
     return fetchedLists.filter(list => list !== undefined);
 };
 
-// Get all cards in certain lists
+
+/**
+ * @async
+ * @function get_cards_in_lists
+ * @description Retrieves all cards in the specified lists.
+ * @param {Array} list_ids - Array of list IDs to retrieve cards from.
+ * @returns cards - Array of cards from the specified lists.
+ */
 const get_cards_in_lists = async (list_ids) => {
     const cards = [];
     
@@ -75,6 +107,49 @@ const get_cards_in_lists = async (list_ids) => {
     return cards;
 };
 
+
+/**
+ * @async
+ * @function get_list_from_card_id
+ * @description Retrieves the list object from a given card ID.
+ * @param {string} card_id - The ID of the card. 
+ * @returns 
+ */
+const get_list_from_card_id = async (card_id) => {
+
+    // Validate the input parameters
+    if (!card_id) {
+        throw new Error("card_id must be provided.");
+    }
+
+    // Fetch the card details
+    const card_response = await fetch(`https://api.trello.com/1/cards/${card_id}/?key=${apiKey}&token=${token}`, {
+        method: 'GET'
+    });
+    
+    // Retrieve the list ID from the card response
+    var list_id = null;
+    if (card_response.ok) {
+        const card = await card_response.json();
+        list_id = card.idList;
+    } else {
+        console.error(`Error retrieving list from card ${card_id}:`, card_response.statusText);
+        return null;
+    }
+
+    // Fetch the list details using the list ID
+    const list_response = await fetch(`https://api.trello.com/1/lists/${list_id}/?key=${apiKey}&token=${token}`, {
+        method: 'GET'
+    });
+
+    if (list_response.ok) {
+        const list = await list_response.json();
+        return list;
+    } else {
+        console.error(`Error retrieving list ${list_id}:`, list_response.statusText);
+        return null;
+    }
+}
 
 // Function to get all incomplete checklist items in a given card
 const get_incomplete_checklist_items = async (card) => {
@@ -96,22 +171,21 @@ const get_incomplete_checklist_items = async (card) => {
  * Creates a card for a given checklist item in a list.
  *
  * @async
- * @function create_card_from_checklist_item
- * @param {string} list_id - The ID of the destination list.
+ * @function backlog_checklist_item
+ * @param {string} board_id - The ID of the board.
  * @param {Object} checklist_item - Object of checklist item from which the backlog card will be created.
  * @returns {Object} The object for the created card.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
-const create_card_from_checklist_item = async (list_id, checklist_item) => {
+const backlog_checklist_item = async (board_id, checklist_item) => {
 
     // Validate the input parameters
-    if (!list_id || !checklist_item) {
-        throw new Error("list_id and checklist_item must be provided.");
+    if (!board_id || !checklist_item) {
+        throw new Error("board_id and checklist_item must be provided.");
     }
 
     if (DEBUG) {
         console.log("checklist_item: ", checklist_item);
-        console.log("checklist_item.listId: ", checklist_item.listId);
     }
     
     // Get the list name
@@ -337,21 +411,28 @@ const delete_all_cards_in_lists = async (list_ids) => {
  * 
  * @async
  * @function handle_checklist_item_creation
+ * @param {Object} action_data - The action data containing the checklist item, card, and board details.
  * 
  */
 const handle_checklist_item_creation = async (action_data) => {
-    console.log("createCheckItem: Checklist item created:", action_data.checkItem);
-    console.log("source card: ", action_data.card);
 
-    // Get the card ID and board ID
+    // Get the board ID
     const board_id = action_data.board.id;
-    const checklist_card_id = action_data.card.id;
-    const backlog_list = await get_lists_by_names(board_id, [BACKLOG_LIST_NAME]);
-    const backlog_list_id = backlog_list[0].id;
 
-    const checklist_item = action_data.checkItem;    
+    const checklist_item_id = action_data.checkItem.id;
+    
+    // Get checklist item details
+    const checklist_item_full = await fetch(`https://api.trello.com/1/cards/${action_data.card.id}/checkItems/${checklist_item_id}?key=${apiKey}&token=${token}`, {
+        method: 'GET'
+    });
+
+    const checklist_item = await checklist_item_full.json();
+    if (DEBUG) {
+        console.log("checklist_item_full: ", checklist_item_full);
+    }
+
     // Get the card details
-    const new_card = await create_card_from_checklist_item(backlog_list_id, checklist_item);
+    const new_card = await backlog_checklist_item(board_id, checklist_item);
     if (new_card) {
         console.log("New card created from checklist item:", new_card.name);
     } else {
@@ -365,7 +446,7 @@ module.exports = {
     get_lists_by_names,
     get_cards_in_lists,
     get_incomplete_checklist_items,
-    create_card_from_checklist_item,
+    backlog_checklist_item,
     update_card_name,
     set_custom_fields,
     get_custom_fields,
