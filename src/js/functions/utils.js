@@ -345,6 +345,10 @@ const set_hidden_data = async (card_id, hidden_data) => {
         method: 'PUT'
     });
 
+    if (DEBUG) {
+        console.log("response.ok: ", response.ok);
+    }
+
     return response.ok;
 };
 
