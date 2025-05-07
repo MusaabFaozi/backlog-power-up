@@ -11,5 +11,8 @@
   },
   "devDependencies": {
     "parcel-bundler": "^1.12.5"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
   }
 }

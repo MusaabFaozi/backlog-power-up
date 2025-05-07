@@ -1,5 +1,110 @@
-var backlog_all = function (t) {
-    return t.board().then(board => alert("Hello, there!"))
+
+const {
+    get_incomplete_checklist_items,
+    delete_all_cards_in_lists,
+    backlog_checklist_item,
+} = require('./functions/utils');
+
+const {
+    BACKLOG_LIST_NAME,
+    WIP_LISTS,
+    DONE_LISTS,
+    VERBOSE,
+    DEBUG,
+} = require('./config');
+
+
+const backlog_all = async (t) => {
+
+    if (VERBOSE) {
+        console.log("Backlogging all cards...");
+    }
+
+    const lists = await t.lists('all');
+    const backlog_list = lists.find(list => list.name.toLowerCase() === BACKLOG_LIST_NAME);
+    if(!backlog_list) {
+        return t.popup({
+            title: 'Error',
+            items: [
+                { text: 'Backlog list is not found on this board.', callback: function(t) { return t.closePopup(); } }
+            ]
+        });
+    }
+
+    const backlog_list_id = backlog_list.id;
+    const wip_list_ids = lists
+        .filter(list => WIP_LISTS.includes(list.name.toLowerCase()))
+        .map(list => list.id);
+    const done_list_ids = lists
+        .filter(list => DONE_LISTS.includes(list.name.toLowerCase()))
+        .map(list => list.id);
+    
+    if (DEBUG) {
+        console.log("backlog_list_id: ", backlog_list_id);
+        console.log("wip_list_ids: ", wip_list_ids);
+        console.log("done_list_ids: ", done_list_ids);
+    }
+
+    // Delete existing cards before backlogging cards
+    const combined_init_list_ids = [backlog_list_id, ...wip_list_ids];
+    console.log("combined_init_list_ids: ", combined_init_list_ids);
+    delete_all_cards_in_lists(combined_init_list_ids);
+
+    const cards = await t.cards('all');
+    
+    // Filter out backlog and auxiliary cards
+    if (DEBUG) {
+        console.log("cards: ", cards);
+    }
+
+    const relevant_cards = cards.filter(card => card.idList !== backlog_list_id 
+        && !wip_list_ids.includes(card.idList) && !done_list_ids.includes(card.idList));
+
+    if (DEBUG) {
+        console.log("relevant_cards: ", relevant_cards);
+    }
+
+    const all_incomplete_items = await Promise.all(
+        relevant_cards.map(async card => {
+            const card_checklist_promises = await get_incomplete_checklist_items(card);
+
+            if (DEBUG) {
+                console.log("card_checklist_promises: ", card_checklist_promises);
+            }
+
+            return await Promise.all(card_checklist_promises);
+        })
+    );
+
+    const incomplete_checklist_items = all_incomplete_items.flat(); // Flatten the array of checklist items
+
+    if (DEBUG) {
+        console.log("incomplete_checklist_items: ", incomplete_checklist_items);
+    }
+
+    // Create a new card in the Backlog for each incomplete checklist item
+    const create_card_promises = incomplete_checklist_items.map(checklist_item => {
+        console.log("checklist_item: ", checklist_item);
+        return backlog_checklist_item(checklist_item.idCard, checklist_item);
+    });
+
+    if (DEBUG) {
+        console.log("create_card_promises:", create_card_promises);
+    }
+
+    if (VERBOSE) {
+        console.log(`Created ${incomplete_checklist_items.length} cards in ${BACKLOG_LIST_NAME} for incomplete items.`);
+    }
+
+    // Wait for all cards to be created
+    return Promise.all(create_card_promises).then(function() {
+        return t.popup({
+            title: 'Success',
+            items: [
+            { text: `Created ${incomplete_checklist_items.length} cards in ${BACKLOG_LIST_NAME} for incomplete items.`, callback: function(t) { return t.closePopup(); }}
+            ]
+        });
+    });
 }
 
 window.TrelloPowerUp.initialize({
