@@ -268,6 +268,12 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
         throw new Error(`Failed to set custom fields for card ${backlog_card_id}`);
     }
 
+    // DEBUG ONLY
+    if (DEBUG) {
+        const check_custom_fields = await get_custom_fields(backlog_card_id);
+        console.log("check_custom_fields: ", check_custom_fields);
+    }
+
     return backlog_card;
 }
 
