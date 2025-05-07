@@ -250,10 +250,10 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
 
     // Set the custom fields for the created card
     const custom_fields = {
-        'Task Name': card_name,
-        'Task ID': card_id,
-        'Project Name': list_name,
-        'Checklist Item ID': checklist_item.id,
+        'TaskName': card_name,
+        'TaskID': card_id,
+        'ProjectName': list_name,
+        'CheckItemID': checklist_item.id,
     }
 
     // Set the custom fields for the created card
