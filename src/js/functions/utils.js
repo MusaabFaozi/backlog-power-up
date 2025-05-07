@@ -190,6 +190,7 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
     }
     
     // Get the source Card details
+    console.log("card_id: ", card_id);
     const card_response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
         method: 'GET'
     });
