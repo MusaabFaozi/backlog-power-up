@@ -258,7 +258,7 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
     }
 
     // Set the custom fields for the created card
-    const custom_fields_response = await set_custom_fields(backlog_card_id, custom_fields);
+    const custom_fields_response = await set_hidden_data(backlog_card_id, custom_fields);
 
     // Check if the custom fields are set successfully
     if (custom_fields_response) {
@@ -368,29 +368,6 @@ const get_custom_fields = async (card_id) => {
 
 
 /**
- * Sets the description for a card.
- *
- * @async
- * @function set_card_description
- * @param {string} card_id - The ID of the card.
- * @param {string} description - The description to set for the card.
- * @returns {Promise<void>} A promise that resolves when the description is set.
- * @throws {Error} If the request fails or the response is not 'ok'.
- */
-const set_card_description = async (card_id, description) => {
-    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?desc=${description}&key=${apiKey}&token=${token}`, {
-        method: 'PUT'
-    });
-
-    if (response.ok && VERBOSE) {
-        console.log(`Description set for card ${card_id}`);
-    } else {
-        console.error(`Error setting description for card ${card_id}:`, response.statusText);
-    }
-}
-
-
-/**
  * Deletes a card by card ID.
  *
  * @async
@@ -473,9 +450,8 @@ module.exports = {
     get_incomplete_checklist_items,
     backlog_checklist_item,
     update_card_name,
-    set_custom_fields,
+    set_hidden_data,
     get_custom_fields,
-    set_card_description,
     delete_card,
     delete_all_cards_in_lists,
     handle_checklist_item_creation,
