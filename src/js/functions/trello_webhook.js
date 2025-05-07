@@ -12,7 +12,7 @@ const {
     get_lists_by_names,
     get_cards_in_lists,
     get_incomplete_checklist_items,
-    get_custom_fields,
+    get_meta_data,
     update_card_name,
     handle_checklist_item_creation
  } = require('./utils');
@@ -68,16 +68,16 @@ exports.handler = async (event, context) => {
                         for (const checklist_card of checklist_cards) {
                             if (checklist_card.name.includes(action.data.old.name)) {
 
-                                // Retrieve custom fields for the card
-                                const custom_fields = await get_custom_fields(board_id, checklist_card.id);
+                                // Retrieve meta data for the card
+                                const meta_data = await get_meta_data(board_id, checklist_card.id);
                                 
                                 // Check if Task ID equals the card ID
-                                if (custom_fields && custom_fields.length > 0) {
-                                    const task_id = custom_fields.find(field => field.name === "Task ID");
+                                if (meta_data && meta_data.length > 0) {
+                                    const task_id = meta_data.find(field => field.name === "Task ID");
                                     if (task_id && task_id.value === action.data.card.id) {
                                         // Update the card name based on "Task Name"
-                                        const task_name_field = custom_fields.find(field => field.name === "Task Name");
-                                        const project_name_field = custom_fields.find(field => field.name === "Project Name");
+                                        const task_name_field = meta_data.find(field => field.name === "Task Name");
+                                        const project_name_field = meta_data.find(field => field.name === "Project Name");
 
                                         if (task_name_field && task_name_field.value 
                                             && project_name_field && project_name_field.value) {

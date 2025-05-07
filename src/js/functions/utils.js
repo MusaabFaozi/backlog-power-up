@@ -2,7 +2,7 @@ const {
     apiKey,
     token,
     BACKLOG_LIST_NAME,
-    HIDDEN_DATA_REGEX,
+    META_DATA_REGEX,
     VERBOSE,
     DEBUG,
 } = require('../config');
@@ -250,30 +250,30 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
         console.log(`Created a new card with id: ${backlog_card_id}`);
     }
 
-    // Set the hidden data for the created card
-    const hidden_data = {
+    // Set the meta data for the created card
+    const meta_data = {
         'TaskName': card_name,
         'TaskID': card_id,
         'ProjectName': list_name,
         'CheckItemID': checklist_item.id,
     }
 
-    // Set the hidden data for the created card
-    const hidden_data_response = await set_hidden_data(backlog_card_id, hidden_data);
+    // Set the meta data for the created card
+    const meta_data_response = await set_meta_data(backlog_card_id, meta_data);
 
-    // Check if the hidden data are set successfully
-    if (hidden_data_response) {
+    // Check if the meta data are set successfully
+    if (meta_data_response) {
         if (VERBOSE) {
-            console.log(`Hidden data set successfully for card ${backlog_card_id}`);
+            console.log(`Meta data set successfully for card ${backlog_card_id}`);
         }
     } else {
-        throw new Error(`Failed to set hidden data for card ${backlog_card_id}`);
+        throw new Error(`Failed to set meta data for card ${backlog_card_id}`);
     }
 
     // DEBUG ONLY
     if (DEBUG) {
-        const check_hidden_data = await get_hidden_data(backlog_card_id);
-        console.log("check_hidden_data: ", check_hidden_data);
+        const check_meta_data = await get_meta_data(backlog_card_id);
+        console.log("check_meta_data: ", check_meta_data);
     }
 
     return backlog_card;
@@ -304,20 +304,20 @@ const update_card_name = async (card_id, new_name) => {
 
 
 /**
- * Sets Hidden data for a card.
+ * Sets Meta data for a card.
  *
  * @async
- * @function set_hidden_data
+ * @function set_meta_data
  * @param {string} card_id - The ID of the card.
- * @param {Object} hidden_data - An object containing hidden meta data names and their values.
+ * @param {Object} meta_data - An object containing meta meta data names and their values.
  * @returns {Promise<boolean>} A promise that resolves to true if the operation was successful, false otherwise.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
-const set_hidden_data = async (card_id, hidden_data) => {
+const set_meta_data = async (card_id, meta_data) => {
 
     // Validate the input parameters
-    if (!card_id || !hidden_data) {
-        throw new Error("card_id and hidden_data must be provided.");
+    if (!card_id || !meta_data) {
+        throw new Error("card_id and meta_data must be provided.");
     }
 
     const card_response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`)
@@ -329,14 +329,14 @@ const set_hidden_data = async (card_id, hidden_data) => {
     // Get card description
     const card_desc = card.desc || '';
 
-    // Delete the existing hidden data from the card description if it exists
+    // Delete the existing meta data from the card description if it exists
     let updated_desc = card_desc.replace(HIDDEN_DATA_REGEX, '');
     
-    // Encode the hidden data as a JSON string in base64 format
-    const encoded_hidden_data = btoa(JSON.stringify(hidden_data));
+    // Encode the meta data as a JSON string in base64 format
+    const encoded_meta_data = btoa(JSON.stringify(meta_data));
 
-    // Add the new hidden data to the card description
-    updated_desc += `\n\n\n<!-- Hidden Data: {${encoded_hidden_data}} -->`;
+    // Add the new meta data to the card description
+    updated_desc += `\n\n\n<!-- Meta Data: {${encoded_meta_data}} -->`;
 
     if (DEBUG) {
         console.log("updated_desc: ", updated_desc);
@@ -353,15 +353,15 @@ const set_hidden_data = async (card_id, hidden_data) => {
 
 
 /**
- * Retrieves hidden data for a card.
+ * Retrieves meta data for a card.
  *
  * @async
- * @function get_hidden_data
+ * @function get_meta_data
  * @param {string} card_id - The ID of the card.
- * @returns {Promise<Array<Object>>} A promise that resolves to an Object of hidden data.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an Object of meta data.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
-const get_hidden_data = async (card_id) => {
+const get_meta_data = async (card_id) => {
     const response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
         method: 'GET'
     });
@@ -371,23 +371,23 @@ const get_hidden_data = async (card_id) => {
         throw new Error(`Failed to fetch card details: ${response.status} ${response.statusText}`);
     }
 
-    const hidden_data_match = card.desc.match(HIDDEN_DATA_REGEX);
-    if (!hidden_data_match) {
-        return null; // No hidden data found
+    const meta_data_match = card.desc.match(HIDDEN_DATA_REGEX);
+    if (!meta_data_match) {
+        return null; // No meta data found
     }
 
-    const encoded_hidden_data = hidden_data_match[0].substring(
-        hidden_data_match[0].indexOf('{') + 1,
-        hidden_data_match[0].indexOf('}')
+    const encoded_meta_data = meta_data_match[0].substring(
+        meta_data_match[0].indexOf('{') + 1,
+        meta_data_match[0].indexOf('}')
     );
 
-    const hidden_data = JSON.parse(atob(encoded_hidden_data));
+    const meta_data = JSON.parse(atob(encoded_meta_data));
 
     if (DEBUG) {
-        console.log("hidden_data: ", hidden_data);
+        console.log("meta_data: ", meta_data);
     }
 
-    return hidden_data;
+    return meta_data;
 };
 
 
@@ -467,6 +467,10 @@ const delete_all_cards_in_lists = async (list_ids) => {
 };
 
 
+////////////////////////////////
+// Webhook Handlers
+////////////////////////////////
+
 /**
  * Handles checklist item creation.
  * 
@@ -503,9 +507,12 @@ module.exports = {
     get_incomplete_checklist_items,
     backlog_checklist_item,
     update_card_name,
-    set_hidden_data,
+    set_meta_data,
+    get_meta_data,
     set_card_description,
     delete_card,
     delete_all_cards_in_lists,
+
+    // Webhook Handlers
     handle_checklist_item_creation,
 };
