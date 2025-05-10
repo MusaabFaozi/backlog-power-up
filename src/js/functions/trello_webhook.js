@@ -53,6 +53,10 @@ exports.handler = async (event, context) => {
 
                     // Handle card name change
                     handle_source_card_name_change(action.data);
+
+                    if (VERBOSE) {
+                        console.log("Card name change handled successfully!");
+                    }
                     
                 } else if (action.data.listBefore && action.data.listAfter) {
                     console.log("Card moved from list:", action.data.listBefore.name, "==> list:", action.data.listAfter.name);
@@ -71,10 +75,17 @@ exports.handler = async (event, context) => {
             
             case "createCheckItem":
                 // Handle adding a new checklist item
-                console.log("createCheckItem: Checklist item created:", action.data.checkItem);
+
+                if (VERBOSE) {
+                    console.log("createCheckItem: Checklist item created:", action.data.checkItem);
+                }
 
                 // Call the handler function
                 handle_checklist_item_creation(action.data);
+
+                if (VERBOSE) {
+                    console.log("createCheckItem: Checklist item creation handled successfully!");
+                }
 
                 break;
             
