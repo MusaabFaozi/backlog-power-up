@@ -536,6 +536,7 @@ const handle_source_card_name_change = async (action_data) => {
     const new_source_card_name = action_data.card.name;
     const old_source_card_name = action_data.old.name;
     const board_id = action_data.board.id;
+    const source_card_list = action_data.list;
 
     // Check if the card is in a default list
     const defaultlist_names = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
@@ -544,9 +545,12 @@ const handle_source_card_name_change = async (action_data) => {
 
     // Get cards in default lists
     const checklist_cards = await get_cards_in_lists(defaultlists_ids);
-    const source_card_list = await get_list_from_card_id(source_card_id);
 
     // Check if the card is not in a default list
+    if (DEBUG) {
+        console.log("defaultlists_ids: ", defaultlists_ids);
+        console.log("source_card_list: ", source_card_list);
+    }
     if (!defaultlists_ids.includes(source_card_list.id)) {
         if (DEBUG) {
             console.log("Card is not in a default list:", source_card_list.name, ". Proceeding to update checklist items.");
@@ -558,7 +562,7 @@ const handle_source_card_name_change = async (action_data) => {
                 console.log("checklist_card: ", checklist_card);
                 console.log("old_source_card_name: ", old_source_card_name);
             }
-            
+
             if (checklist_card.name.includes(old_source_card_name)) {
 
                 // Retrieve meta data for the card
