@@ -548,12 +548,18 @@ const handle_source_card_name_change = async (action_data) => {
 
     // Check if the card is not in a default list
     if (!defaultlists_ids.includes(source_card_list.id)) {
-        for (const checklist_card of checklist_cards) {
-            if (checklist_card.name.includes(old_source_card_name)) {
+        if (DEBUG) {
+            console.log("Card is not in a default list:", source_card_list.name, ". Proceeding to update checklist items.");
+        }
 
-                if (DEBUG) {
-                    console.log("checklist_card: ", checklist_card);
-                }
+        for (const checklist_card of checklist_cards) {
+
+            if (DEBUG) {
+                console.log("checklist_card: ", checklist_card);
+                console.log("old_source_card_name: ", old_source_card_name);
+            }
+            
+            if (checklist_card.name.includes(old_source_card_name)) {
 
                 // Retrieve meta data for the card
                 const meta_data = await get_meta_data(board_id, checklist_card.id);
@@ -564,7 +570,7 @@ const handle_source_card_name_change = async (action_data) => {
                     if (task_id && task_id.value === source_card_id) {
                         
                         // Update the checklist card name
-                        const new_name = `[${source_card_list.name}] ${new_source_card_name}`;
+                        const new_name = checklist_card.name.replace(old_source_card_name, new_source_card_name);
                         update_card_name(checklist_card.id, new_name);
                         if (VERBOSE) {
                             console.log("Checklist card name successfully updated:", new_name);
