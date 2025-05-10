@@ -59,22 +59,21 @@ const get_lists_by_names = async (board_id, list_names) => {
 
     // Fetch all lists from the board
     const fetchListsPromises = list_names.map(async (list_name) => {
-        try {
-            const response = await fetch(`https://api.trello.com/1/boards/${board_id}/lists?key=${apiKey}&token=${token}`, {
-                method: 'GET'
-            });
 
-            // Wait for the response to resolve
-            if (!response.ok) {
-                throw new Error(`Failed to fetch lists: ${response.status} ${response.statusText}`);
-            }
+        const response = await fetch(`https://api.trello.com/1/boards/${board_id}/lists?key=${apiKey}&token=${token}`, {
+            method: 'GET'
+        });
 
-            const lists = await response.json();
-            return lists.find(list => list.name.toLowerCase() === list_name);
-        } catch (error) {
-            console.error(`Error fetching list "${list_name}":`, error.message);
-            return undefined;
+        // Wait for the response to resolve
+        if (!response.ok) {
+            throw new Error(`Failed to fetch lists: ${response.status} ${response.statusText}`);
         }
+
+        const lists = await response.json();
+
+        console.log("lists: ", lists);
+
+        return lists.find(list => list.name.toLowerCase() === list_name);
     });
 
     // Wait for all fetch promises to resolve
