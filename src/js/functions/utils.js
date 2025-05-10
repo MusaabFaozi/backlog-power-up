@@ -295,12 +295,6 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
         throw new Error(`Failed to set meta data for card ${backlog_card_id}`);
     }
 
-    // DEBUG ONLY
-    if (DEBUG) {
-        const check_meta_data = await get_meta_data(backlog_card_id);
-        console.log("check_meta_data: ", check_meta_data);
-    }
-
     return backlog_card;
 }
 
@@ -380,18 +374,13 @@ const set_meta_data = async (card_id, meta_data) => {
 /**
  * Retrieves meta data for a card.
  *
- * @async
  * @function get_meta_data
- * @param {string} card_id - The ID of the card.
+ * @param {string} card - The card containing the description with meta data.
  * @returns {Promise<Array<Object>>} A promise that resolves to an Object of meta data.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
-const get_meta_data = async (card_id) => {
-    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
-        method: 'GET'
-    });
+const get_meta_data = function (card) {
 
-    const card = await response.json();
     if (!card) {
         throw new Error(`Failed to fetch card details: ${response.status} ${response.statusText}`);
     }
@@ -574,26 +563,20 @@ const handle_source_card_name_change = async (action_data) => {
             console.log("Card is not in a default list:", source_card_list.name, ". Proceeding to update checklist items.");
         }
 
-        for (const checklist_card of checklist_cards) {
-
-            if (DEBUG) {
-                console.log("checklist_card: ", checklist_card);
-                console.log("old_source_card_name: ", old_source_card_name);
-            }
-
+        await Promise.all(checklist_cards.map(async (checklist_card) => {
             if (checklist_card.name.includes(old_source_card_name)) {
 
                 // Retrieve meta data for the card
-                const meta_data = await get_meta_data(board_id, checklist_card.id);
+                const meta_data = get_meta_data(checklist_card);
                 
                 // Check if Task ID equals the card ID
                 if (meta_data && meta_data.length > 0) {
                     const task_id = meta_data.find(field => field.name === "TaskID");
                     if (task_id && task_id.value === source_card_id) {
-                        
+                    
                         // Update the checklist card name
                         const new_name = checklist_card.name.replace(old_source_card_name, new_source_card_name);
-                        update_card_name(checklist_card.id, new_name);
+                        await update_card_name(checklist_card.id, new_name);
                         if (VERBOSE) {
                             console.log("Checklist card name successfully updated:", new_name);
                         }
@@ -613,18 +596,15 @@ const handle_source_card_name_change = async (action_data) => {
                             'CheckItemID': meta_data.find(field => field.name === "CheckItemID").value,
                         }
 
-                        set_meta_data(checklist_card.id, new_meta_data);
+                        await set_meta_data(checklist_card.id, new_meta_data);
                         if (DEBUG) {
                             console.log("Meta data successfully updated for checklist card:", checklist_card.id);
                         }
                     }
                 }
             }
-        }
-    } else {
-        console.log("Card moved from list:", action_data.listBefore.name, "==> list:", action_data.listAfter.name);
-    }
-
+        }));
+        
     return;
 }
 
