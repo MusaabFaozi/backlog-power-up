@@ -66,10 +66,14 @@ const get_lists_by_names = async (board_id, list_names) => {
             method: 'GET'
         });
 
+        console.log("response: ", response);
+
         // Wait for the response to resolve
         if (!response.ok) {
             throw new Error(`Failed to fetch lists: ${response.status} ${response.statusText}`);
         }
+
+        console.log("response: ", response);
 
         const lists = await response.json();
 
