@@ -532,16 +532,19 @@ const handle_source_card_name_change = async (action_data) => {
     // }
 
     // Unpack the action data
+    console.log("1111111111");
     const source_card_id = action_data.card.id;
     const new_source_card_name = action_data.card.name;
     const old_source_card_name = action_data.old.name;
     const board_id = action_data.board.id;
     const source_card_list = action_data.list;
+    console.log("2222222222");
 
     // Check if the card is in a default list
     const defaultlist_names = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
     const defaultlists = await get_lists_by_names(board_id, defaultlist_names);
     const defaultlists_ids = defaultlists.map(list => list.id);
+    console.log("33333333333");
 
     // Get cards in default lists
     const checklist_cards = await get_cards_in_lists(defaultlists_ids);
