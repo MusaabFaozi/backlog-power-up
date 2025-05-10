@@ -572,7 +572,7 @@ const handle_source_card_name_change = async (action_data) => {
                         // Create promises for updating the checklist card
                         const updateNamePromise = (async () => {
                             const new_name = checklist_card.name.replace(old_source_card_name, new_source_card_name);
-                            await update_card_name(checklist_card.id, new_name);
+                            return update_card_name(checklist_card.id, new_name);
                             if (VERBOSE) {
                                 console.log("Checklist card name successfully updated:", new_name);
                             }
@@ -580,7 +580,7 @@ const handle_source_card_name_change = async (action_data) => {
 
                         const updateDescriptionPromise = (async () => {
                             const new_desc = `### Card Details:\nTask: ${new_source_card_name}\nProject: ${source_card_list.name}`;
-                            await set_card_description(checklist_card.id, new_desc);
+                            return set_card_description(checklist_card.id, new_desc);
                             if (DEBUG) {
                                 console.log("Checklist card description successfully updated:", new_desc);
                             }
@@ -593,14 +593,14 @@ const handle_source_card_name_change = async (action_data) => {
                                 'ProjectName': source_card_list.name,
                                 'CheckItemID': meta_data.find(field => field.name === "CheckItemID").value,
                             };
-                            await set_meta_data(checklist_card.id, new_meta_data);
+                            return set_meta_data(checklist_card.id, new_meta_data);
                             if (DEBUG) {
                                 console.log("Meta data successfully updated for checklist card:", checklist_card.id);
                             }
                         });
 
                         // Return all promises
-                        return Promise.all([updateNamePromise, updateDescriptionPromise, updateMetaDataPromise]);
+                        return [updateNamePromise, updateDescriptionPromise, updateMetaDataPromise];
                     }
                 }
             }
