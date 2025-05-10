@@ -51,41 +51,49 @@ const get_board_backlog_list_id = async (board_id) => {
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
 const get_lists_by_names = async (board_id, list_names) => {
-
     // Validate the input parameters
+    if (!board_id) {
+        throw new Error("board_id must be provided.");
+    }
+
     if (!Array.isArray(list_names) || list_names.length === 0) {
         throw new Error("list_names must be a non-empty array of strings.");
     }
 
-    console.log("list_names: ", list_names);
+    console.log("Fetching lists for board:", board_id);
+    console.log("List names to search for:", list_names);
 
-    // Fetch all lists from the board
-    const fetchListsPromises = list_names.map(async (list_name) => {
-
+    try {
+        // Fetch all lists from the board
         const response = await fetch(`https://api.trello.com/1/boards/${board_id}/lists?key=${apiKey}&token=${token}`, {
-            method: 'GET'
+            method: 'GET',
         });
 
-        console.log("response: ", response);
-
-        // Wait for the response to resolve
         if (!response.ok) {
             throw new Error(`Failed to fetch lists: ${response.status} ${response.statusText}`);
         }
 
-        console.log("response: ", response);
-
         const lists = await response.json();
+        console.log("Fetched lists:", lists);
 
-        console.log("lists: ", lists);
+        // Filter the lists to match the provided names (case-insensitive)
+        const matchedLists = list_names.map((list_name) => {
+            const matchedList = lists.find((list) => list.name.toLowerCase() === list_name.toLowerCase());
+            if (!matchedList) {
+                console.warn(`List not found: ${list_name}`);
+            }
+            return matchedList;
+        });
 
-        return lists.find(list => list.name.toLowerCase() === list_name);
-    });
+        // Filter out undefined values (lists that were not found)
+        const filteredLists = matchedLists.filter((list) => list !== undefined);
+        console.log("Matched lists:", filteredLists);
 
-    // Wait for all fetch promises to resolve
-    const fetchedLists = await Promise.all(fetchListsPromises);
-
-    return fetchedLists.filter(list => list !== undefined);
+        return filteredLists;
+    } catch (error) {
+        console.error("Error in get_lists_by_names:", error.message);
+        return [];
+    }
 };
 
 
