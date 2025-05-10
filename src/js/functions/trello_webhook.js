@@ -9,11 +9,6 @@ const {
 } = require('../config');
 
 const { 
-    get_lists_by_names,
-    get_cards_in_lists,
-    get_incomplete_checklist_items,
-    get_meta_data,
-    update_card_name,
     handle_checklist_item_creation,
     handle_source_card_name_change,
  } = require('./utils');

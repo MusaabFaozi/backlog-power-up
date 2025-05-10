@@ -69,12 +69,8 @@ const get_lists_by_names = async (board_id, list_names) => {
             method: 'GET',
         });
 
-        console.log("Response status:", response.status);
-        console.log("Response body:", await response.text());
-
         if (!response.ok) {
-            console.error(`Failed to fetch lists: ${response.status} ${response.statusText}`);
-            return [];
+            throw new Error(`Failed to fetch lists: ${response.status} ${response.statusText}`);
         }
 
         const lists = await response.json();
