@@ -52,7 +52,7 @@ exports.handler = async (event, context) => {
                     }
 
                     // Handle card name change
-                    handle_source_card_name_change(action.data);
+                    await handle_source_card_name_change(action.data);
 
                     if (VERBOSE) {
                         console.log("Card name change handled successfully!");
@@ -81,7 +81,7 @@ exports.handler = async (event, context) => {
                 }
 
                 // Call the handler function
-                handle_checklist_item_creation(action.data);
+                await handle_checklist_item_creation(action.data);
 
                 if (VERBOSE) {
                     console.log("createCheckItem: Checklist item creation handled successfully!");
