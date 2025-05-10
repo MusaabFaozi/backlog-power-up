@@ -50,7 +50,15 @@ exports.handler = async (event, context) => {
             case "updateCard":
                 // Handle updating an existing card
                 if (action.data.old && action.data.old.name) {
-                    console.log("Card name changed from:", action.data.old.name, "==>", action.data.card.name);
+
+                    if (VERBOSE) {
+                        console.log("Card name changed from:", action.data.old.name, "==>", action.data.card.name);
+                    }
+
+                    if (DEBUG) {
+                        console.log("action.data.old:", action.data.old);
+                        console.log("action.data.card:", action.data.card);
+                    }
                     
                     // Get board ID and default list names
                     const board_id = action.data.card.idBoard;
