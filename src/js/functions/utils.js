@@ -5,6 +5,8 @@ const {
     META_DATA_REGEX,
     VERBOSE,
     DEBUG,
+    WIP_LISTS,
+    DONE_LISTS,
 } = require('../config');
 
 
@@ -90,21 +92,31 @@ const get_lists_by_names = async (board_id, list_names) => {
  * @returns cards - Array of cards from the specified lists.
  */
 const get_cards_in_lists = async (list_ids) => {
-    const cards = [];
+
+    // Validate the input parameters
+    if (!Array.isArray(list_ids) || list_ids.length === 0) {
+        throw new Error("list_ids must be a non-empty array of strings.");
+    }
+
+    let cards = [];
     
-    for (const list_id of list_ids) {
+    // Fetch all cards from the lists
+    const fetchPromises = list_ids.map(async (list_id) => {
         const response = await fetch(`https://api.trello.com/1/lists/${list_id}/cards?key=${apiKey}&token=${token}`, {
             method: 'GET'
         });
-        
+
         if (response.ok) {
             const list_cards = await response.json();
             cards.push(...list_cards);
         } else {
             console.error(`Error retrieving cards from list ${list_id}:`, response.statusText);
         }
-    }
-    
+    });
+
+    // Wait for all fetch promises to resolve
+    await Promise.all(fetchPromises);
+
     return cards;
 };
 
@@ -114,7 +126,7 @@ const get_cards_in_lists = async (list_ids) => {
  * @function get_list_from_card_id
  * @description Retrieves the list object from a given card ID.
  * @param {string} card_id - The ID of the card. 
- * @returns 
+ * @returns {Object} The list object associated with the card.
  */
 const get_list_from_card_id = async (card_id) => {
 
@@ -129,7 +141,7 @@ const get_list_from_card_id = async (card_id) => {
     });
     
     // Retrieve the list ID from the card response
-    var list_id = null;
+    let list_id = null;
     if (card_response.ok) {
         const card = await card_response.json();
         list_id = card.idList;
@@ -476,7 +488,8 @@ const delete_all_cards_in_lists = async (list_ids) => {
  * 
  * @async
  * @function handle_checklist_item_creation
- * @param {Object} action_data - The action data containing the checklist item, card, and board details.
+ * @param {Object} action_data - The action data containing the checklist item and source card details.
+ * @returns {Promise<Object>} The created card object.
  * 
  */
 const handle_checklist_item_creation = async (action_data) => {
@@ -501,9 +514,98 @@ const handle_checklist_item_creation = async (action_data) => {
     return card;
 }
 
+
+/**
+ * Handles source card name change.
+ * 
+ * @async
+ * @function handle_source_card_name_change
+ * @param {Object} action_data - The action data containing the card and board details.
+ */
+const handle_source_card_name_change = async (action_data) => {
+
+    if (DEBUG) {
+        console.log("action_data old: ", action_data.old);
+        console.log("action_data card: ", action_data.card);
+        console.log("action_data board: ", action_data.board);
+        console.log("action_data: ", action_data);
+    }
+
+    // Unpack the action data
+    const source_card_id = action_data.card.id;
+    const new_source_card_name = action_data.card.name;
+    const old_source_card_name = action_data.old.name;
+    const board_id = action_data.board.id;
+
+    // Check if the card is in a default list
+    const defaultlist_names = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
+    const defaultlists = await get_lists_by_names(board_id, defaultlist_names);
+    const defaultlists_ids = defaultlists.map(list => list.id);
+
+    // Get cards in default lists
+    const checklist_cards = await get_cards_in_lists(defaultlists_ids);
+    const source_card_list = await get_list_from_card_id(source_card_id);
+
+    // Check if the card is not in a default list
+    if (!defaultlists_ids.includes(source_card_list.id)) {
+        for (const checklist_card of checklist_cards) {
+            if (checklist_card.name.includes(old_source_card_name)) {
+
+                if (DEBUG) {
+                    console.log("checklist_card: ", checklist_card);
+                }
+
+                // Retrieve meta data for the card
+                const meta_data = await get_meta_data(board_id, checklist_card.id);
+                
+                // Check if Task ID equals the card ID
+                if (meta_data && meta_data.length > 0) {
+                    const task_id = meta_data.find(field => field.name === "TaskID");
+                    if (task_id && task_id.value === source_card_id) {
+                        
+                        // Update the checklist card name
+                        const new_name = `[${source_card_list.name}] ${new_source_card_name}`;
+                        update_card_name(checklist_card.id, new_name);
+                        if (VERBOSE) {
+                            console.log("Checklist card name successfully updated:", new_name);
+                        }
+
+                        // Update the description of the checklist card
+                        const new_desc = `### Card Details:\nTask: ${new_source_card_name}\nProject: ${source_card_list.name}`;
+                        await set_card_description(checklist_card.id, new_desc);
+                        if (DEBUG) {
+                            console.log("Checklist card description successfully updated:", new_desc);
+                        }
+
+                        // Update the meta data for the checklist card
+                        const new_meta_data = {
+                            'TaskName': new_source_card_name,
+                            'TaskID': source_card_id,
+                            'ProjectName': source_card_list.name,
+                            'CheckItemID': meta_data.find(field => field.name === "CheckItemID").value,
+                        }
+
+                        set_meta_data(checklist_card.id, new_meta_data);
+                        if (DEBUG) {
+                            console.log("Meta data successfully updated for checklist card:", checklist_card.id);
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        console.log("Card moved from list:", action_data.listBefore.name, "==> list:", action_data.listAfter.name);
+    }
+
+    return;
+}
+
+
 module.exports = {
     get_lists_by_names,
     get_cards_in_lists,
+    get_list_from_card_id,
+    get_board_backlog_list_id,
     get_incomplete_checklist_items,
     backlog_checklist_item,
     update_card_name,
@@ -515,4 +617,5 @@ module.exports = {
 
     // Webhook Handlers
     handle_checklist_item_creation,
+    handle_source_card_name_change,
 };

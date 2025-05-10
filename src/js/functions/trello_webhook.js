@@ -14,7 +14,8 @@ const {
     get_incomplete_checklist_items,
     get_meta_data,
     update_card_name,
-    handle_checklist_item_creation
+    handle_checklist_item_creation,
+    handle_source_card_name_change,
  } = require('./utils');
 
 
@@ -59,54 +60,17 @@ exports.handler = async (event, context) => {
                         console.log("action.data.old:", action.data.old);
                         console.log("action.data.card:", action.data.card);
                     }
+
+                    // Handle card name change
+                    handle_source_card_name_change(action.data);
                     
-                    // Get board ID and default list names
-                    const board_id = action.data.card.idBoard;
-                    const defaultlist_names = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
-
-                    // Get incomplete checklist items and default list IDs
-                    const defaultlists = get_lists_by_names(board_id, defaultlist_names);
-                    const defaultlists_ids = defaultlists.map(list => list.id);
-                    
-                    // Get cards in default lists
-                    const checklist_cards = await get_cards_in_lists(worklists_ids);
-
-                    // Check if the card is not in a default list
-                    if (!defaultlists_ids.includes(action.data.card.idList)) {
-                        for (const checklist_card of checklist_cards) {
-                            if (checklist_card.name.includes(action.data.old.name)) {
-
-                                // Retrieve meta data for the card
-                                const meta_data = await get_meta_data(board_id, checklist_card.id);
-                                
-                                // Check if Task ID equals the card ID
-                                if (meta_data && meta_data.length > 0) {
-                                    const task_id = meta_data.find(field => field.name === "Task ID");
-                                    if (task_id && task_id.value === action.data.card.id) {
-                                        // Update the card name based on "Task Name"
-                                        const task_name_field = meta_data.find(field => field.name === "Task Name");
-                                        const project_name_field = meta_data.find(field => field.name === "Project Name");
-
-                                        if (task_name_field && task_name_field.value 
-                                            && project_name_field && project_name_field.value) {
-
-                                            new_name = `[${project_name_field.value}] task_name_field.value`;
-                                            const update_result = await update_card_name(checklist_card.id, new_name);
-                                            if (update_result) {
-                                                console.log("Card name successfully updated:", new_name);
-                                            } else {
-                                                console.log("Failed to update card name:", new_name);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
                 } else if (action.data.listBefore && action.data.listAfter) {
                     console.log("Card moved from list:", action.data.listBefore.name, "==> list:", action.data.listAfter.name);
                 } else {
                     console.log("Card updated:", action.data.card);
+                    if (DEBUG) {
+                        console.log("action.data old:", action.data.old);
+                    }
                 }
                 break;
 
@@ -120,7 +84,7 @@ exports.handler = async (event, context) => {
                 console.log("createCheckItem: Checklist item created:", action.data.checkItem);
 
                 // Call the handler function
-                await handle_checklist_item_creation(action.data);
+                handle_checklist_item_creation(action.data);
 
                 break;
             
