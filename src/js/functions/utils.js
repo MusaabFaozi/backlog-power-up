@@ -604,7 +604,8 @@ const handle_source_card_name_change = async (action_data) => {
                 }
             }
         }));
-        
+    }
+    
     return;
 }
 
