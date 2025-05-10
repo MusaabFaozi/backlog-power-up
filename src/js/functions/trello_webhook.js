@@ -56,11 +56,6 @@ exports.handler = async (event, context) => {
                         console.log("Card name changed from:", action.data.old.name, "==>", action.data.card.name);
                     }
 
-                    if (DEBUG) {
-                        console.log("action.data.old:", action.data.old);
-                        console.log("action.data.card:", action.data.card);
-                    }
-
                     // Handle card name change
                     handle_source_card_name_change(action.data);
                     

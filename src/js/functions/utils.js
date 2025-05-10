@@ -524,12 +524,12 @@ const handle_checklist_item_creation = async (action_data) => {
  */
 const handle_source_card_name_change = async (action_data) => {
 
-    if (DEBUG) {
-        console.log("action_data old: ", action_data.old);
-        console.log("action_data card: ", action_data.card);
-        console.log("action_data board: ", action_data.board);
-        console.log("action_data: ", action_data);
-    }
+    // if (DEBUG) {
+    //     console.log("action_data old: ", action_data.old);
+    //     console.log("action_data card: ", action_data.card);
+    //     console.log("action_data board: ", action_data.board);
+    //     console.log("action_data: ", action_data);
+    // }
 
     // Unpack the action data
     const source_card_id = action_data.card.id;
