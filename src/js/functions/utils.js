@@ -57,6 +57,8 @@ const get_lists_by_names = async (board_id, list_names) => {
         throw new Error("list_names must be a non-empty array of strings.");
     }
 
+    console.log("list_names: ", list_names);
+
     // Fetch all lists from the board
     const fetchListsPromises = list_names.map(async (list_name) => {
 
