@@ -591,7 +591,7 @@ const handle_source_card_name_change = async (action_data) => {
             const meta_data = get_meta_data(checklist_card);
             
             // Check if Task ID equals the card ID
-            if (meta_data && meta_data.length > 0) {
+            if (meta_data) {
                 const task_id = meta_data.find(field => field.name === "TaskID");
                 console.log("task_id: ", task_id);
                 console.log("source_card_id: ", source_card_id);
