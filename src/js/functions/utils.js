@@ -310,15 +310,26 @@ const backlog_checklist_item = async (card_id, checklist_item) => {
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
 const update_card_name = async (card_id, new_name) => {
-    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?name=${new_name}&key=${apiKey}&token=${token}`, {
-        method: 'PUT'
-    });
+    return new Promise(async (resolve, reject) => {
+        try {
+            const response = await fetch(`https://api.trello.com/1/cards/${card_id}?name=${new_name}&key=${apiKey}&token=${token}`, {
+                method: 'PUT'
+            });
 
-    if (response.ok && VERBOSE) {
-        console.log(`Card name updated to ${new_name} for card ${card_id}`);
-    } else {
-        console.error(`Error updating card name for card ${card_id}:`, response.statusText);
-    }
+            if (response.ok) {
+                if (VERBOSE) {
+                    console.log(`Card name updated to ${new_name} for card ${card_id}`);
+                }
+                resolve();
+            } else {
+                console.error(`Error updating card name for card ${card_id}:`, response.statusText);
+                reject(new Error(`Failed to update card name: ${response.statusText}`));
+            }
+        } catch (error) {
+            console.error(`Error updating card name for card ${card_id}:`, error.message);
+            reject(error);
+        }
+    });
 };
 
 
