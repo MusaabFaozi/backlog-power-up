@@ -39,6 +39,8 @@ exports.handler = async (event, context) => {
         const payload = JSON.parse(event.body);
         const action = payload.action;
 
+        console.log("Received action:", action.type);
+
         // Perform your desired actions here
         switch (action.type) {
             case "createCard":
