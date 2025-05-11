@@ -209,99 +209,104 @@ const get_incomplete_checklist_items = async (card) => {
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
 const backlog_checklist_item = async (card_id, checklist_item) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Validate the input parameters
+            if (!card_id || !checklist_item) {
+                throw new Error("card_id and checklist_item must be provided.");
+            }
 
-    // Validate the input parameters
-    if (!card_id || !checklist_item) {
-        throw new Error("card_id and checklist_item must be provided.");
-    }
+            if (DEBUG) {
+                console.log("checklist_item: ", checklist_item);
+            }
 
-    if (DEBUG) {
-        console.log("checklist_item: ", checklist_item);
-    }
-    
-    // Get the source Card details
-    console.log("card_id: ", card_id);
-    const card_response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
-        method: 'GET'
-    });
+            // Get the source Card details
+            console.log("card_id: ", card_id);
+            const card_response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
+                method: 'GET'
+            });
 
-    if (!card_response.ok) {
-        throw new Error(`Failed to fetch card details: ${card_response.status} ${card_response.statusText}`);
-    }
-    const source_card = await card_response.json();
+            if (!card_response.ok) {
+                throw new Error(`Failed to fetch card details: ${card_response.status} ${card_response.statusText}`);
+            }
+            const source_card = await card_response.json();
 
-    // Unpack the card details
-    const card_name = source_card.name;
-    const board_id = source_card.idBoard;
+            // Unpack the card details
+            const card_name = source_card.name;
+            const board_id = source_card.idBoard;
 
-    // Get the backlog list ID
-    const backlog_list_id = await get_board_backlog_list_id(board_id);
-    if (!backlog_list_id) {
-        throw new Error(`Failed to fetch backlog list ID for board ${board_id}`);
-    }
+            // Get the backlog list ID
+            const backlog_list_id = await get_board_backlog_list_id(board_id);
+            if (!backlog_list_id) {
+                throw new Error(`Failed to fetch backlog list ID for board ${board_id}`);
+            }
 
-    // Get the list name
-    const list = await get_list_from_card_id(card_id);
-    if (!list) {
-        throw new Error(`Failed to fetch list for card ${card_id}`);
-    }
-    
-    const list_name = list.name;
-    
-    // Create a new card
-    const response = await fetch(`https://api.trello.com/1/cards`, {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            name: `[${card_name}] ${checklist_item.name}`,
-            desc: `### Card Details:\nTask: ${card_name}\nProject: ${list_name}`,
-            idList: backlog_list_id,
-            pos: 'top',
-            key: apiKey,
-            token: token
-        })
-    })
+            // Get the list name
+            const list = await get_list_from_card_id(card_id);
+            if (!list) {
+                throw new Error(`Failed to fetch list for card ${card_id}`);
+            }
 
-    // Check if the response is ok
-    if (!response.ok) {
-        throw new Error(`Failed to create card: ${response.status} ${response.statusText}`);
-    }
-    const backlog_card = await response.json();
+            const list_name = list.name;
 
-    if (DEBUG) {
-        console.log("card: ", backlog_card);
-    }
+            // Create a new card
+            const response = await fetch(`https://api.trello.com/1/cards`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: `[${card_name}] ${checklist_item.name}`,
+                    desc: `### Card Details:\nTask: ${card_name}\nProject: ${list_name}`,
+                    idList: backlog_list_id,
+                    pos: 'top',
+                    key: apiKey,
+                    token: token
+                })
+            });
 
-    const backlog_card_id = backlog_card.id;
+            // Check if the response is ok
+            if (!response.ok) {
+                throw new Error(`Failed to create card: ${response.status} ${response.statusText}`);
+            }
+            const backlog_card = await response.json();
 
-    if (VERBOSE) {
-        console.log(`Created a new card with id: ${backlog_card_id}`);
-    }
+            if (DEBUG) {
+                console.log("card: ", backlog_card);
+            }
 
-    // Set the meta data for the created card
-    const meta_data = {
-        'TaskName': card_name,
-        'TaskID': card_id,
-        'ProjectName': list_name,
-        'CheckItemID': checklist_item.id,
-    }
+            const backlog_card_id = backlog_card.id;
 
-    // Set the meta data for the created card
-    const meta_data_response = await set_meta_data(backlog_card_id, meta_data);
+            if (VERBOSE) {
+                console.log(`Created a new card with id: ${backlog_card_id}`);
+            }
 
-    // Check if the meta data are set successfully
-    if (meta_data_response) {
-        if (VERBOSE) {
-            console.log(`Meta data set successfully for card ${backlog_card_id}`);
+            // Set the meta data for the created card
+            const meta_data = {
+                'TaskName': card_name,
+                'TaskID': card_id,
+                'ProjectName': list_name,
+                'CheckItemID': checklist_item.id,
+            };
+
+            // Set the meta data for the created card
+            const meta_data_response = await set_meta_data(backlog_card_id, meta_data);
+
+            // Check if the meta data are set successfully
+            if (meta_data_response) {
+                if (VERBOSE) {
+                    console.log(`Meta data set successfully for card ${backlog_card_id}`);
+                }
+            } else {
+                throw new Error(`Failed to set meta data for card ${backlog_card_id}`);
+            }
+
+            resolve(backlog_card);
+        } catch (error) {
+            reject(error);
         }
-    } else {
-        throw new Error(`Failed to set meta data for card ${backlog_card_id}`);
-    }
-
-    return backlog_card;
-}
+    });
+};
 
 
 /**
