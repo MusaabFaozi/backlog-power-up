@@ -398,7 +398,7 @@ const set_meta_data = (card_id, meta_data) => {
  *
  * @function get_meta_data
  * @param {string} card - The card containing the description with meta data.
- * @returns {Promise<Array<Object>>} A promise that resolves to an Object of meta data.
+ * @returns {Object} An Object of meta data.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
 const get_meta_data = function (card) {
@@ -629,10 +629,10 @@ const handle_source_card_name_change = async (action_data) => {
 
             const updateMetaDataPromise = (async () => {
                 const new_meta_data = {
-                'TaskName': new_source_card_name,
-                'TaskID': source_card_id,
-                'ProjectName': source_card_list.name,
-                'CheckItemID': meta_data.find(field => field.name === "CheckItemID").value,
+                    'TaskName': new_source_card_name,
+                    'TaskID': source_card_id,
+                    'ProjectName': source_card_list.name,
+                    'CheckItemID': meta_data.CheckItemID,
                 };
                 await set_meta_data(checklist_card.id, new_meta_data);
                 if (DEBUG) {

@@ -40,7 +40,9 @@ exports.handler = async (event, context) => {
         switch (action.type) {
             case "createCard":
                 // Handle adding a new card
-                console.log("Card created:", action.data.card);
+                if (VERBOSE) {
+                    console.log("Card created:", action.data.card.name, "with ID:", action.data.card.id);
+                }
                 break;
 
             case "updateCard":
