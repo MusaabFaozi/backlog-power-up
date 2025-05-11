@@ -61,6 +61,7 @@ exports.handler = async (event, context) => {
                     }
                     
                 } else if (action.data.listBefore && action.data.listAfter) {
+                    console.log("action.data:", action.data);
                     console.log("Card moved from list:", action.data.listBefore.name, "==> list:", action.data.listAfter.name);
                 } else {
                     console.log("Card updated:", action.data.card);
