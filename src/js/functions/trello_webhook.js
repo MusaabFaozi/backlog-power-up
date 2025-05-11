@@ -11,6 +11,9 @@ const {
 const { 
     handle_checklist_item_creation,
     handle_source_card_name_change,
+    handle_source_card_list_change,
+    handle_done_backlog_card,
+    handle_undone_backlog_card,
  } = require('./utils');
 
 
@@ -66,17 +69,32 @@ exports.handler = async (event, context) => {
                     default_lists = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
                     incomplete_lists = [BACKLOG_LIST_NAME, ...WIP_LISTS];
                     if (!default_lists.includes(action.data.listBefore.name.toLowerCase())
-                         && !default_lists.includes(action.data.listAfter.name.toLowerCase())) {
+                            && !default_lists.includes(action.data.listAfter.name.toLowerCase())) {
                         console.log("Source card", action.data.card.name,"moved to a list:", action.data.listAfter.name);
 
-                    } else if (incomplete_lists.includes(action.data.listBefore.name.toLowerCase()) 
-                        && DONE_LISTS.includes(action.data.listAfter.name.toLowerCase())) {
+                        await handle_source_card_list_change(action.data);
+                        if (VERBOSE) {
+                            console.log("Source card list change handled successfully!");
+                        }
+
+                    } else if (incomplete_lists.includes(action.data.listBefore.name.toLowerCase())
+                            && DONE_LISTS.includes(action.data.listAfter.name.toLowerCase())) {
                         console.log("Backlog card", action.data.card.name,"moved to Done list:", action.data.listAfter.name);
 
+                        await handle_done_backlog_card(action.data);
+                        if (VERBOSE) {
+                            console.log("Card done handled successfully!");
+                        }
+
                     } else if (DONE_LISTS.includes(action.data.listBefore.name.toLowerCase())
-                         && incomplete_lists.includes(action.data.listAfter.name.toLowerCase())) {
+                            && incomplete_lists.includes(action.data.listAfter.name.toLowerCase())) {
                         console.log("Done card", action.data.card.name,"moved back to Backlog list:", action.data.listAfter.name);
-                        
+
+                        await handle_undone_backlog_card(action.data);
+                        if (VERBOSE) {
+                            console.log("Card undone handled successfully!");
+                        }
+
                     } else {
                         console.log("Unhandled card move from list:", action.data.listBefore.name, "==> list:", action.data.listAfter.name);
                     }

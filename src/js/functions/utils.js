@@ -643,6 +643,107 @@ const handle_source_card_name_change = async (action_data) => {
 }
 
 
+/**
+ * Handles source card list change.
+ * 
+ * @async
+ * @function handle_source_card_list_change
+ * @param {Object} action_data - The action data containing the card, board, and list details.
+ * @returns {Promise<void>}
+ */
+const handle_source_card_list_change = async (action_data) => {
+    // Unpack the action data
+    const source_card_id = action_data.card.id;
+    const source_card_name = action_data.card.name;
+    const source_card_new_list = action_data.listAfter;
+    const board_id = action_data.board.id;
+
+    // Check if the card is in a default list
+    const defaultlist_names = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
+    const defaultlists = await get_lists_by_names(board_id, defaultlist_names);
+    const defaultlists_ids = defaultlists.map(list => list.id);
+
+    // Get cards in default lists
+    const checklist_cards = (await get_cards_in_lists(defaultlists_ids))
+        .filter(card => card.name.includes(source_card_name));
+
+    // Check if the card is not in a default list
+    if (DEBUG) {
+        console.log("defaultlists_ids: ", defaultlists_ids);
+        console.log("source_card_new_list: ", source_card_new_list);
+    }
+
+    await Promise.all(checklist_cards.map(async (checklist_card) => {
+
+        if (DEBUG) {
+            console.log("checklist_card name: ", checklist_card.name);
+            console.log("source_card_new_list name: ", source_card_new_list.name);
+        }
+
+        // Retrieve meta data for the card
+        const meta_data = get_meta_data(checklist_card);
+        
+        // Check if Task ID equals the card ID
+        if (meta_data) {
+            const task_id = meta_data.TaskID;
+
+            // Check if the task ID matches the source card ID
+            if (task_id === source_card_id) {
+
+                // Update the description of the checklist card
+                const new_desc = `### Card Details:\nTask: ${source_card_name}\nProject: ${source_card_new_list.name}`;
+                await set_card_description(checklist_card.id, new_desc);
+                if (DEBUG) {
+                    console.log("Checklist card description successfully updated:", new_desc);
+                }
+
+                // Update the meta data of the checklist card
+                const new_meta_data = {
+                    'TaskName': source_card_name,
+                    'TaskID': source_card_id,
+                    'ProjectName': source_card_new_list.name,
+                    'CheckItemID': meta_data.CheckItemID,
+                };
+                await set_meta_data(checklist_card.id, new_meta_data);
+                if (DEBUG) {
+                    console.log("Meta data successfully updated for checklist card:", checklist_card.id);
+                }
+            }
+        }
+    }));
+
+    return;
+}
+
+
+/**
+ * Handles done backlog card.
+ * 
+ * @async
+ * @function handle_done_backlog_card
+ * @param {Object} action_data - The action data containing the done checklist card details.
+ * @returns {Promise<void>}
+ */
+const handle_done_backlog_card = async (action_data) => {
+
+    return;
+}
+
+
+/**
+ * Handles undo done checklist card.
+ * 
+ * @async
+ * @function handle_undone_backlog_card
+ * @param {Object} action_data - The action data containing the done checklist card details.
+ * @returns {Promise<void>}
+ */
+const handle_undone_backlog_card = async (action_data) => {
+
+    return;
+}
+
+
 module.exports = {
     get_lists_by_names,
     get_cards_in_lists,
@@ -660,4 +761,7 @@ module.exports = {
     // Webhook Handlers
     handle_checklist_item_creation,
     handle_source_card_name_change,
+    handle_source_card_list_change,
+    handle_done_backlog_card,
+    handle_undone_backlog_card,
 };
