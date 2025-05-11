@@ -343,42 +343,48 @@ const update_card_name = async (card_id, new_name) => {
  * @returns {Promise<boolean>} A promise that resolves to true if the operation was successful, false otherwise.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
-const set_meta_data = async (card_id, meta_data) => {
+const set_meta_data = (card_id, meta_data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Validate the input parameters
+            if (!card_id || !meta_data) {
+                throw new Error("card_id and meta_data must be provided.");
+            }
 
-    // Validate the input parameters
-    if (!card_id || !meta_data) {
-        throw new Error("card_id and meta_data must be provided.");
-    }
+            const card_response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`);
+            if (!card_response.ok) {
+                throw new Error(`Failed to fetch card details: ${card_response.status} ${card_response.statusText}`);
+            }
+            const card = await card_response.json();
 
-    const card_response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`)
-    if (!card_response.ok) {
-        throw new Error(`Failed to fetch card details: ${response.status} ${response.statusText}`);
-    }
-    const card = await card_response.json();
+            // Get card description
+            const card_desc = card.desc || '';
 
-    // Get card description
-    const card_desc = card.desc || '';
+            // Delete the existing meta data from the card description if it exists
+            let updated_desc = card_desc.replace(META_DATA_REGEX, '');
 
-    // Delete the existing meta data from the card description if it exists
-    let updated_desc = card_desc.replace(META_DATA_REGEX, '');
-    
-    // Encode the meta data as a JSON string in base64 format
-    const encoded_meta_data = btoa(JSON.stringify(meta_data));
+            // Encode the meta data as a JSON string in base64 format
+            const encoded_meta_data = btoa(JSON.stringify(meta_data));
 
-    // Add the new meta data to the card description
-    updated_desc += `\n\n\n<!-- Meta Data: {${encoded_meta_data}} -->`;
+            // Add the new meta data to the card description
+            updated_desc += `\n\n\n<!-- Meta Data: {${encoded_meta_data}} -->`;
 
-    if (DEBUG) {
-        console.log("updated_desc: ", updated_desc);
-    }
+            if (DEBUG) {
+                console.log("updated_desc: ", updated_desc);
+            }
 
-    const response = await set_card_description(card_id, updated_desc);
+            const response = await set_card_description(card_id, updated_desc);
 
-    if (DEBUG) {
-        console.log("set_card_description response: ", response);
-    }
+            if (DEBUG) {
+                console.log("set_card_description response: ", response);
+            }
 
-    return response.ok;
+            resolve(response.ok);
+        } catch (error) {
+            console.error("Error in set_meta_data:", error.message);
+            reject(error);
+        }
+    });
 };
 
 
@@ -426,23 +432,32 @@ const get_meta_data = function (card) {
  * @returns {Promise<void>} A promise that resolves when the description is set.
  * @throws {Error} If the request fails or the response is not 'ok'.
  */
-const set_card_description = async (card_id, description) => {
-    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ desc: description })
+const set_card_description = (card_id, description) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ desc: description })
+            });
+
+            if (response.ok) {
+                if (VERBOSE) {
+                    console.log(`Description set for card ${card_id}`);
+                }
+                resolve(response);
+            } else {
+                console.error(`Error setting description for card ${card_id}:`, response.statusText);
+                reject(new Error(`Failed to set description: ${response.statusText}`));
+            }
+        } catch (error) {
+            console.error(`Error setting description for card ${card_id}:`, error.message);
+            reject(error);
+        }
     });
-
-    if (response.ok && VERBOSE) {
-        console.log(`Description set for card ${card_id}`);
-    } else {
-        console.error(`Error setting description for card ${card_id}:`, response.statusText);
-    }
-
-    return response;
-}
+};
 
 
 /**
