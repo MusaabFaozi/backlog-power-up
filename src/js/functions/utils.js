@@ -74,7 +74,6 @@ const get_lists_by_names = async (board_id, list_names) => {
         }
 
         const lists = await response.json();
-        console.log("Fetched lists:", lists);
 
         // Filter the lists to match the provided names (case-insensitive)
         const matchedLists = list_names.map((list_name) => {
@@ -87,7 +86,13 @@ const get_lists_by_names = async (board_id, list_names) => {
 
         // Filter out undefined values (lists that were not found)
         const filteredLists = matchedLists.filter((list) => list !== undefined);
-        console.log("Matched lists:", filteredLists);
+
+        if (DEBUG) {
+            for (const list of filteredLists) {
+                console.log(`List found: ${list.name} (ID: ${list.id})`);
+            }
+        }
+
 
         return filteredLists;
     } catch (error) {
