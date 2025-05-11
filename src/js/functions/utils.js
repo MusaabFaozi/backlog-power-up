@@ -571,73 +571,75 @@ const handle_source_card_name_change = async (action_data) => {
     const defaultlists = await get_lists_by_names(board_id, defaultlist_names);
     const defaultlists_ids = defaultlists.map(list => list.id);
 
+    if (defaultlists_ids.includes(source_card_list.id)) {
+        if (DEBUG) {
+            console.log("Card is in a default list:", source_card_list.name, ". No need to update checklist items.");
+        }
+        return;
+    }
+
     // Get cards in default lists
-    const checklist_cards = await get_cards_in_lists(defaultlists_ids);
+    const checklist_cards = (await get_cards_in_lists(defaultlists_ids))
+        .filter(card => card.name.includes(old_source_card_name));
 
     // Check if the card is not in a default list
     if (DEBUG) {
         console.log("defaultlists_ids: ", defaultlists_ids);
         console.log("source_card_list: ", source_card_list);
     }
-    if (!defaultlists_ids.includes(source_card_list.id)) {
+
+    await Promise.all(checklist_cards.map(async (checklist_card) => {
+
         if (DEBUG) {
-            console.log("Card is not in a default list:", source_card_list.name, ". Proceeding to update checklist items.");
-        }
-
-        await Promise.all(checklist_cards.map(async (checklist_card) => {
-
             console.log("checklist_card: ", checklist_card);
             console.log("old_source_card_name: ", old_source_card_name);
+        }
 
-            if (checklist_card.name.includes(old_source_card_name)) {
+        // Retrieve meta data for the card
+        const meta_data = get_meta_data(checklist_card);
+        
+        // Check if Task ID equals the card ID
+        if (meta_data) {
+            const task_id = meta_data.TaskID;
+            console.log("task_id: ", task_id);
+            console.log("source_card_id: ", source_card_id);
+            if (task_id === source_card_id) {
 
-            // Retrieve meta data for the card
-            const meta_data = get_meta_data(checklist_card);
-            
-            // Check if Task ID equals the card ID
-            if (meta_data) {
-                const task_id = meta_data.TaskID;
-                console.log("task_id: ", task_id);
-                console.log("source_card_id: ", source_card_id);
-                if (task_id === source_card_id) {
-
-                // Create promises for updating the checklist card
-                const updateNamePromise = (async () => {
-                    const new_name = checklist_card.name.replace(old_source_card_name, new_source_card_name);
-                    await update_card_name(checklist_card.id, new_name);
-                    if (VERBOSE) {
-                    console.log("Checklist card name successfully updated:", new_name);
-                    }
-                })();
-
-                const updateDescriptionPromise = (async () => {
-                    const new_desc = `### Card Details:\nTask: ${new_source_card_name}\nProject: ${source_card_list.name}`;
-                    await set_card_description(checklist_card.id, new_desc);
-                    if (DEBUG) {
-                    console.log("Checklist card description successfully updated:", new_desc);
-                    }
-                })();
-
-                const updateMetaDataPromise = (async () => {
-                    const new_meta_data = {
-                    'TaskName': new_source_card_name,
-                    'TaskID': source_card_id,
-                    'ProjectName': source_card_list.name,
-                    'CheckItemID': meta_data.find(field => field.name === "CheckItemID").value,
-                    };
-                    await set_meta_data(checklist_card.id, new_meta_data);
-                    if (DEBUG) {
-                    console.log("Meta data successfully updated for checklist card:", checklist_card.id);
-                    }
-                })();
-
-                // Wait for all promises to resolve
-                await Promise.all([updateNamePromise, updateDescriptionPromise, updateMetaDataPromise]);
+            // Create promises for updating the checklist card
+            const updateNamePromise = (async () => {
+                const new_name = checklist_card.name.replace(old_source_card_name, new_source_card_name);
+                await update_card_name(checklist_card.id, new_name);
+                if (VERBOSE) {
+                console.log("Checklist card name successfully updated:", new_name);
                 }
+            })();
+
+            const updateDescriptionPromise = (async () => {
+                const new_desc = `### Card Details:\nTask: ${new_source_card_name}\nProject: ${source_card_list.name}`;
+                await set_card_description(checklist_card.id, new_desc);
+                if (DEBUG) {
+                console.log("Checklist card description successfully updated:", new_desc);
+                }
+            })();
+
+            const updateMetaDataPromise = (async () => {
+                const new_meta_data = {
+                'TaskName': new_source_card_name,
+                'TaskID': source_card_id,
+                'ProjectName': source_card_list.name,
+                'CheckItemID': meta_data.find(field => field.name === "CheckItemID").value,
+                };
+                await set_meta_data(checklist_card.id, new_meta_data);
+                if (DEBUG) {
+                console.log("Meta data successfully updated for checklist card:", checklist_card.id);
+                }
+            })();
+
+            // Wait for all promises to resolve
+            await Promise.all([updateNamePromise, updateDescriptionPromise, updateMetaDataPromise]);
             }
-            }
-        }));
-    }
+        }
+    }));
 
     return;
 }
