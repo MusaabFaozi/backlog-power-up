@@ -61,17 +61,22 @@ exports.handler = async (event, context) => {
                     }
                     
                 } else if (action.data.listBefore && action.data.listAfter) {
-                    console.log("Card moved from list:", action.data.listBefore.name, "==> list:", action.data.listAfter.name);
 
                     // Check which handlers to call based on the list names
                     default_lists = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
                     incomplete_lists = [BACKLOG_LIST_NAME, ...WIP_LISTS];
-                    if (!default_lists.includes(action.data.listBefore.name) && !default_lists.includes(action.data.listAfter.name)) {
+                    if (!default_lists.includes(action.data.listBefore.name.toLowerCase())
+                         && !default_lists.includes(action.data.listAfter.name.toLowerCase())) {
                         console.log("Source card", action.data.card.name,"moved to a list:", action.data.listAfter.name);
-                    } else if (incomplete_lists.includes(action.data.listBefore.name) && DONE_LISTS.includes(action.data.listAfter.name)) {
+
+                    } else if (incomplete_lists.includes(action.data.listBefore.name.toLowerCase()) 
+                        && DONE_LISTS.includes(action.data.listAfter.name.toLowerCase())) {
                         console.log("Backlog card", action.data.card.name,"moved to Done list:", action.data.listAfter.name);
-                    } else if (DONE_LISTS.includes(action.data.listBefore.name) && incomplete_lists.includes(action.data.listAfter.name)) {
+
+                    } else if (DONE_LISTS.includes(action.data.listBefore.name.toLowerCase())
+                         && incomplete_lists.includes(action.data.listAfter.name.toLowerCase())) {
                         console.log("Done card", action.data.card.name,"moved back to Backlog list:", action.data.listAfter.name);
+                        
                     } else {
                         console.log("Unhandled card move from list:", action.data.listBefore.name, "==> list:", action.data.listAfter.name);
                     }
