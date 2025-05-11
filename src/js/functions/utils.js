@@ -585,6 +585,10 @@ const handle_source_card_name_change = async (action_data) => {
         }
 
         await Promise.all(checklist_cards.map(async (checklist_card) => {
+
+            console.log("checklist_card: ", checklist_card);
+            console.log("old_source_card_name: ", old_source_card_name);
+
             if (checklist_card.name.includes(old_source_card_name)) {
 
             // Retrieve meta data for the card
