@@ -595,7 +595,7 @@ const handle_source_card_name_change = async (action_data) => {
                 const task_id = meta_data.TaskID;
                 console.log("task_id: ", task_id);
                 console.log("source_card_id: ", source_card_id);
-                if (task_id && task_id.value === source_card_id) {
+                if (task_id === source_card_id) {
 
                 // Create promises for updating the checklist card
                 const updateNamePromise = (async () => {
