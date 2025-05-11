@@ -561,48 +561,48 @@ const handle_source_card_name_change = async (action_data) => {
         await Promise.all(checklist_cards.map(async (checklist_card) => {
             if (checklist_card.name.includes(old_source_card_name)) {
 
-                // Retrieve meta data for the card
-                const meta_data = get_meta_data(checklist_card);
-                
-                // Check if Task ID equals the card ID
-                if (meta_data && meta_data.length > 0) {
-                    const task_id = meta_data.find(field => field.name === "TaskID");
-                    if (task_id && task_id.value === source_card_id) {
+            // Retrieve meta data for the card
+            const meta_data = get_meta_data(checklist_card);
+            
+            // Check if Task ID equals the card ID
+            if (meta_data && meta_data.length > 0) {
+                const task_id = meta_data.find(field => field.name === "TaskID");
+                if (task_id && task_id.value === source_card_id) {
 
-                        // Create promises for updating the checklist card
-                        const updateNamePromise = (async () => {
-                            const new_name = checklist_card.name.replace(old_source_card_name, new_source_card_name);
-                            return update_card_name(checklist_card.id, new_name);
-                            if (VERBOSE) {
-                                console.log("Checklist card name successfully updated:", new_name);
-                            }
-                        });
-
-                        const updateDescriptionPromise = (async () => {
-                            const new_desc = `### Card Details:\nTask: ${new_source_card_name}\nProject: ${source_card_list.name}`;
-                            return set_card_description(checklist_card.id, new_desc);
-                            if (DEBUG) {
-                                console.log("Checklist card description successfully updated:", new_desc);
-                            }
-                        });
-
-                        const updateMetaDataPromise = (async () => {
-                            const new_meta_data = {
-                                'TaskName': new_source_card_name,
-                                'TaskID': source_card_id,
-                                'ProjectName': source_card_list.name,
-                                'CheckItemID': meta_data.find(field => field.name === "CheckItemID").value,
-                            };
-                            return set_meta_data(checklist_card.id, new_meta_data);
-                            if (DEBUG) {
-                                console.log("Meta data successfully updated for checklist card:", checklist_card.id);
-                            }
-                        });
-
-                        // Return all promises
-                        return [updateNamePromise, updateDescriptionPromise, updateMetaDataPromise];
+                // Create promises for updating the checklist card
+                const updateNamePromise = (async () => {
+                    const new_name = checklist_card.name.replace(old_source_card_name, new_source_card_name);
+                    await update_card_name(checklist_card.id, new_name);
+                    if (VERBOSE) {
+                    console.log("Checklist card name successfully updated:", new_name);
                     }
+                })();
+
+                const updateDescriptionPromise = (async () => {
+                    const new_desc = `### Card Details:\nTask: ${new_source_card_name}\nProject: ${source_card_list.name}`;
+                    await set_card_description(checklist_card.id, new_desc);
+                    if (DEBUG) {
+                    console.log("Checklist card description successfully updated:", new_desc);
+                    }
+                })();
+
+                const updateMetaDataPromise = (async () => {
+                    const new_meta_data = {
+                    'TaskName': new_source_card_name,
+                    'TaskID': source_card_id,
+                    'ProjectName': source_card_list.name,
+                    'CheckItemID': meta_data.find(field => field.name === "CheckItemID").value,
+                    };
+                    await set_meta_data(checklist_card.id, new_meta_data);
+                    if (DEBUG) {
+                    console.log("Meta data successfully updated for checklist card:", checklist_card.id);
+                    }
+                })();
+
+                // Wait for all promises to resolve
+                await Promise.all([updateNamePromise, updateDescriptionPromise, updateMetaDataPromise]);
                 }
+            }
             }
         }));
     }
