@@ -148,7 +148,7 @@ exports.handler = async (event, context) => {
             
             case "deleteCheckItem":
                 // Handle deleting a checklist item
-                console.log("Checklist item deleted:", action.data.checkItem);
+                console.log("Checklist item deleted:", action.data);
                 break;
             
             default:

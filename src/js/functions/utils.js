@@ -833,6 +833,19 @@ const handle_checklist_item_update = async (action_data) => {
     // Update the checklist card name
     await Promise.all(checklist_cards.map(async (checklist_card) => {
 
+        const meta_data = get_meta_data(checklist_card);
+        if (!meta_data) {
+            console.error(`No meta data found for checklist card ${checklist_card.id}`);
+            return;
+        }
+
+        // Check if Task ID equals the card ID
+        const checkitem_id = meta_data.CheckItemID;
+        if (checkitem_id !== checklist_item.id) {
+            console.log("Check item ID does not match:", checkitem_id, "!==", checklist_item.id);
+            return;
+        }
+
         new_name = `[${source_card_name}] ${checklist_item.name}`;
 
         await update_card_name(checklist_card.id, new_name);
