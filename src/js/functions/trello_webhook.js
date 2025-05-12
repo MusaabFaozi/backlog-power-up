@@ -109,7 +109,7 @@ exports.handler = async (event, context) => {
 
             case "deleteCard":
                 // Handle deleting a card
-                console.log("Card deleted:", action.data.card);
+                console.log("Card deleted:", action.data);
                 break;
             
             case "createCheckItem":
@@ -131,6 +131,11 @@ exports.handler = async (event, context) => {
             case "updateCheckItem":
                 // Handle updating an existing checklist item
                 console.log("Checklist item updated:", action.data.checkItem);
+                break;
+
+            case "updateCheckItemStateOnCard":
+                // Handle updating the state of a checklist item on a card
+                console.log("Checklist item state updated:", action.data);
                 break;
             
             case "deleteCheckItem":
