@@ -812,7 +812,7 @@ const handle_checklist_item_update = async (action_data) => {
 
     // Unpack the action data
     const checklist_item = action_data.checkItem;
-    const source_card_id = action_data.card.id;
+    const old_checklist_item = action_data.old;
     const source_card_name = action_data.card.name;
     const board_id = action_data.board.id;
 
@@ -823,7 +823,7 @@ const handle_checklist_item_update = async (action_data) => {
 
     // Get cards in default lists
     const checklist_cards = (await get_cards_in_lists(defaultlists_ids))
-        .filter(card => card.name.includes(checklist_item.name));
+        .filter(card => card.name.includes(old_checklist_item.name));
 
     if (checklist_cards.length === 0) {
         console.log("No checklist cards found for checklist item:", checklist_item.name);
