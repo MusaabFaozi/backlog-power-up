@@ -83,7 +83,7 @@ exports.handler = async (event, context) => {
                             && DONE_LISTS.includes(action.data.listAfter.name.toLowerCase())) {
                         console.log("Backlog card", action.data.card.name,"moved to Done list:", action.data.listAfter.name);
 
-                        await handle_done_backlog_card(action.data);
+                        await handle_complete_checklist_card(action.data, 'complete');
                         if (VERBOSE) {
                             console.log("Card done handled successfully!");
                         }
@@ -92,7 +92,7 @@ exports.handler = async (event, context) => {
                             && incomplete_lists.includes(action.data.listAfter.name.toLowerCase())) {
                         console.log("Done card", action.data.card.name,"moved back to Backlog list:", action.data.listAfter.name);
 
-                        await handle_undone_backlog_card(action.data);
+                        await handle_complete_checklist_card(action.data, 'incomplete');
                         if (VERBOSE) {
                             console.log("Card undone handled successfully!");
                         }

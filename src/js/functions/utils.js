@@ -517,6 +517,45 @@ const delete_all_cards_in_lists = async (list_ids) => {
 };
 
 
+/**
+ * Updates checklist item state in a card.
+ * 
+ * @async
+ * @function update_checklist_item_state
+ * @param {string} card_id - The ID of the card.
+ * @param {string} checklist_item_id - The ID of the checklist item.
+ * @param {string} state - The new state of the checklist item (e.g., 'complete', 'incomplete').
+ * @returns {Promise<void>} A promise that resolves when the checklist item state is updated.
+ * @throws {Error} If the request fails or the response is not 'ok'.
+ */
+const update_checklist_item_state = async (card_id, checklist_item_id, state) => {
+
+    // Validate the input parameters
+    if (!card_id || !checklist_item_id || !state) {
+        throw new Error("card_id, checklist_item_id, and state must be provided.");
+    }
+
+    // Update the checklist item state
+    const response = await fetch(`https://api.trello.com/1/cards/${card_id}/checkItem/${checklist_item_id}?key=${apiKey}&token=${token}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ state: state })
+    });
+
+    if (response.ok) {
+        if (VERBOSE) {
+            console.log(`Checklist item ${checklist_item_id} updated to ${state} for card ${card_id}`);
+        }
+    } else {
+        console.error(`Error updating checklist item ${checklist_item_id} for card ${card_id}:`, response.statusText);
+    }
+
+    return;
+}
+
+
 ////////////////////////////////
 // Webhook Handlers
 ////////////////////////////////
@@ -725,25 +764,37 @@ const handle_source_card_list_change = async (action_data) => {
  * Handles done backlog card.
  * 
  * @async
- * @function handle_done_backlog_card
+ * @function handle_complete_checklist_card
  * @param {Object} action_data - The action data containing the done checklist card details.
+ * @param {Object} state - The state to which it changes the source checklist item (e.g. 'complete' or 'incomplete').
  * @returns {Promise<void>}
  */
-const handle_done_backlog_card = async (action_data) => {
+const handle_complete_checklist_card = async (action_data, state) => {
 
-    return;
-}
+    // Unpack the action data
+    const checklist_card_id = action_data.card.id;
 
+    // Get the full checklist card details
+    const checklist_card_response = await fetch(`https://api.trello.com/1/cards/${checklist_card_id}?key=${apiKey}&token=${token}`, {
+        method: 'GET'
+    });
 
-/**
- * Handles undo done checklist card.
- * 
- * @async
- * @function handle_undone_backlog_card
- * @param {Object} action_data - The action data containing the done checklist card details.
- * @returns {Promise<void>}
- */
-const handle_undone_backlog_card = async (action_data) => {
+    if (!checklist_card_response.ok) {
+        console.error(`Error retrieving checklist card ${checklist_card_id}:`, checklist_card_response.statusText);
+        return;
+    }
+
+    const checklist_card = await checklist_card_response.json();
+
+    // Retrieve meta data for the card
+    const meta_data = get_meta_data(checklist_card);
+    if (!meta_data) {
+        console.error(`No meta data found for checklist card ${checklist_card_id}`);
+        return;
+    }
+
+    // Update the source checklist item ID
+    await update_checklist_item_state(meta_data.TaskID, meta_data.CheckItemID, state);
 
     return;
 }
@@ -767,6 +818,5 @@ module.exports = {
     handle_checklist_item_creation,
     handle_source_card_name_change,
     handle_source_card_list_change,
-    handle_done_backlog_card,
-    handle_undone_backlog_card,
+    handle_complete_checklist_card,
 };
