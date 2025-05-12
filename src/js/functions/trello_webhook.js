@@ -13,6 +13,7 @@ const {
     handle_source_card_name_change,
     handle_source_card_list_change,
     handle_complete_checklist_card,
+    handle_checklist_item_update,
  } = require('./utils');
 
 
@@ -131,6 +132,13 @@ exports.handler = async (event, context) => {
             case "updateCheckItem":
                 // Handle updating an existing checklist item
                 console.log("Checklist item updated:", action.data.checkItem);
+
+                // Call the handler function
+                await handle_checklist_item_update(action.data);
+                if (VERBOSE) {
+                    console.log("Checklist item update handled successfully!");
+                }
+                
                 break;
 
             case "updateCheckItemStateOnCard":
