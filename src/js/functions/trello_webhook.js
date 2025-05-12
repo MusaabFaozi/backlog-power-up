@@ -12,8 +12,7 @@ const {
     handle_checklist_item_creation,
     handle_source_card_name_change,
     handle_source_card_list_change,
-    handle_done_backlog_card,
-    handle_undone_backlog_card,
+    handle_complete_checklist_card,
  } = require('./utils');
 
 
