@@ -800,6 +800,53 @@ const handle_complete_checklist_card = async (action_data, state) => {
 }
 
 
+/**
+ * Handles checklist item update.
+ * 
+ * @async
+ * @function handle_checklist_item_update
+ * @param {Object} action_data - The action data containing the checklist item and source card details.
+ * @returns {Promise<void>}
+ */
+const handle_checklist_item_update = async (action_data) => {
+
+    // Unpack the action data
+    const checklist_item = action_data.checkItem;
+    const source_card_id = action_data.card.id;
+    const source_card_name = action_data.card.name;
+    const board_id = action_data.board.id;
+
+    // Check if checklist card in a default list
+    const defaultlist_names = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
+    const defaultlists = await get_lists_by_names(board_id, defaultlist_names);
+    const defaultlists_ids = defaultlists.map(list => list.id);
+
+    // Get cards in default lists
+    const checklist_cards = (await get_cards_in_lists(defaultlists_ids))
+        .filter(card => card.name.includes(checklist_item.name));
+
+    if (checklist_cards.length === 0) {
+        console.log("No checklist cards found for checklist item:", checklist_item.name);
+        return;
+    }
+
+    // Update the checklist card name
+    await Promise.all(checklist_cards.map(async (checklist_card) => {
+
+        new_name = `[${source_card_name}] ${checklist_item.name}`;
+
+        await update_card_name(checklist_card.id, new_name);
+        if (VERBOSE) {
+            console.log("Checklist card name successfully updated:", new_name);
+        }
+
+        return;
+    }));
+
+    return;
+}
+
+
 module.exports = {
     get_lists_by_names,
     get_cards_in_lists,
@@ -819,4 +866,5 @@ module.exports = {
     handle_source_card_name_change,
     handle_source_card_list_change,
     handle_complete_checklist_card,
+    handle_checklist_item_update,
 };
