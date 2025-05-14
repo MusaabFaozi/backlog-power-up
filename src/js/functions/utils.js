@@ -40,6 +40,7 @@ const get_board_backlog_list_id = async (board_id) => {
     return backlog_list_id;
 }
 
+
 /**
  * Retrieves all lists with specific names.
  *
@@ -471,6 +472,43 @@ const set_card_description = (card_id, description) => {
 
 
 /**
+ * Change card list.
+ * 
+ * @async
+ * @function move_card_to_list
+ * @param {string} card_id - The ID of the card to move.
+ * @param {string} list_id - The ID of the list to move the card to.
+ * @returns {Promise<void>} A promise that resolves when the card is moved.
+ * @throws {Error} If the request fails or the response is not 'ok'.
+ */
+const move_card_to_list = async (card_id, list_id) => {
+    // Validate the input parameters
+    if (!card_id || !list_id) {
+        throw new Error("card_id and list_id must be provided.");
+    }
+
+    // Move the card to the specified list
+    const response = await fetch(`https://api.trello.com/1/cards/${card_id}?key=${apiKey}&token=${token}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ idList: list_id })
+    });
+
+    if (response.ok) {
+        if (VERBOSE) {
+            console.log(`Card ${card_id} moved to list ${list_id}`);
+        }
+    } else {
+        console.error(`Error moving card ${card_id} to list ${list_id}:`, response.statusText);
+    }
+
+    return;
+}
+
+
+/**
  * Deletes a card by card ID.
  *
  * @async
@@ -860,6 +898,155 @@ const handle_checklist_item_update = async (action_data) => {
 }
 
 
+/**
+ * Handles checklist state update.
+ * 
+ * @async
+ * @function handle_checklist_state_update
+ * @param {Object} action_data - The action data containing the checklist item and source card details.
+ * @returns {Promise<void>}
+ */
+const handle_checklist_state_update = async (action_data) => {
+
+    // Unpack the action data
+    const board_id = action_data.board.id;
+    const checklist_item = action_data.checkItem;
+    const source_card_id = action_data.card.id;
+    const source_card_name = action_data.card.name;
+
+    // Check if the card is in a default list
+    const defaultlist_names = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
+    const defaultlists = await get_lists_by_names(board_id, defaultlist_names);
+    const defaultlists_ids = defaultlists.map(list => list.id);
+
+    // Get the Done and Backlog lists
+    const done_list = defaultlists.find(list => DONE_LISTS.includes(list.name));
+    const backlog_list = defaultlists.find(list => list.name === BACKLOG_LIST_NAME);
+
+
+    // Get cards in default lists
+    const checklist_cards = (await get_cards_in_lists(defaultlists_ids))
+        .filter(card => card.name.includes(checklist_item.name) && card.name.includes(source_card_name));
+
+        
+    // Iterate through the checklist cards
+    await Promise.all(checklist_cards.map(async (checklist_card) => {
+
+        // Retrieve meta data for the card
+        const meta_data = get_meta_data(checklist_card);
+        if (!meta_data) {
+            console.error(`No meta data found for checklist card ${checklist_card.id}`);
+            return;
+        }
+
+        // Check if Task ID equals the card ID
+        const checkitem_id = meta_data.checkItemID;
+        if (checkitem_id === checklist_item.id) {
+
+            if (checklist_item.state === 'complete') {
+
+                // Check if item is not in a backlog list
+                const checklist_card_list = await get_list_from_card_id(checklist_card.id);
+                const backlog_lists = [BACKLOG_LIST_NAME, ...WIP_LISTS];
+                if (!backlog_lists.includes(checklist_card_list.name)) {
+                    console.log("Checklist card is not in a backlog list:", checklist_card_list.name);
+                    return;
+                }
+
+                // Move the checklist card to the Done list
+                await move_card_to_list(checklist_card.id, done_list.id);
+                if (VERBOSE) {
+                    console.log("Checklist card moved to Done list:", done_list.name);
+                }
+
+                return;
+
+            } else if (checklist_item.state === 'incomplete') {
+
+                // Check if item is Done list
+                if (checklist_card.idList === done_list.id) {
+                    // Move the checklist card back to the Backlog list
+                    await move_card_to_list(checklist_card.id, backlog_list.id);
+                    if (DEBUG) {
+                        console.log("Checklist card moved back to Backlog list:", backlog_list.name);
+                    }
+
+                    return;
+                }
+            }
+
+
+        }
+    }));
+
+    // Handle if no checklist cards found
+    if (checklist_cards.length === 0 && checklist_item.state === 'incomplete') {
+
+        // If no checklist cards found, create a new card
+        await backlog_checklist_item(source_card_id, checklist_item);
+        
+        return;
+    }
+
+    if (DEBUG) {
+        console.log("No checklist card changes were made for:", checklist_item.name);
+    }
+
+    return;
+}
+
+
+/**
+ * Handles card deletion.
+ * 
+ * @async
+ * @function handle_source_card_deletion
+ * @param {Object} action_data - The action data containing the card details.
+ * @returns {Promise<void>}
+ */
+const handle_source_card_deletion = async (action_data) => {
+
+    // Unpack the action data
+    const board_id = action_data.board.id;
+    const source_card = action_data.card;
+
+    // Get all default lists
+    const defaultlist_names = [BACKLOG_LIST_NAME, ...WIP_LISTS, ...DONE_LISTS];
+    const defaultlists = await get_lists_by_names(board_id, defaultlist_names);
+    const defaultlists_ids = defaultlists.map(list => list.id);
+
+    // Get all incomplete checklist items
+    const checklist_cards = (await get_cards_in_lists(defaultlists_ids))
+        .filter(card => card.name.includes(checklist_item.name) && card.name.includes(source_card.name));
+
+    // Iterate through the incomplete checklist items
+    await Promise.all(checklist_cards.map(async (checklist_card) => {
+
+        // Retrieve meta data for the card
+        const meta_data = get_meta_data(checklist_card);
+        if (!meta_data) {
+            console.error(`No meta data found for checklist item ${checklist_card.id}`);
+            return;
+        }
+
+        // Check if Task ID equals the card ID
+        const task_id = meta_data.TaskID;
+        if (task_id === source_card.id) {
+
+            // Update the checklist item state to 'incomplete'
+            await delete_card(checklist_card.id);
+            if (VERBOSE) {
+                console.log("Checklist card deleted:", checklist_card.name);
+            }
+
+            return;
+        }
+    }));
+
+    return;
+}
+
+
 module.exports = {
     get_lists_by_names,
     get_cards_in_lists,
@@ -880,4 +1067,6 @@ module.exports = {
     handle_source_card_list_change,
     handle_complete_checklist_card,
     handle_checklist_item_update,
+    handle_checklist_state_update,
+    handle_source_card_deletion,
 };

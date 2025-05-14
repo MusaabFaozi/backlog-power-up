@@ -14,6 +14,8 @@ const {
     handle_source_card_list_change,
     handle_complete_checklist_card,
     handle_checklist_item_update,
+    handle_checklist_state_update,
+    handle_source_card_deletion,
  } = require('./utils');
 
 
@@ -100,6 +102,13 @@ exports.handler = async (event, context) => {
                     } else {
                         console.log("Unhandled card move from list:", action.data.listBefore.name, "==> list:", action.data.listAfter.name);
                     }
+                } else if (action.data.old && action.data.old.closed) {
+
+                    // Handle card archival as deletion
+                    await handle_source_card_deletion(action.data);
+                    if (VERBOSE) {
+                        console.log("Card archieved:", action.data.card.name);
+                    }
                 } else {
                     console.log("Card updated:", action.data.card);
                     if (DEBUG) {
@@ -110,7 +119,10 @@ exports.handler = async (event, context) => {
 
             case "deleteCard":
                 // Handle deleting a card
-                console.log("Card deleted:", action.data);
+                await handle_source_card_deletion(action.data);
+                if (VERBOSE) {
+                    console.log("Card deleted:", action.data.card.name);
+                }
                 break;
             
             case "createCheckItem":
@@ -143,7 +155,11 @@ exports.handler = async (event, context) => {
 
             case "updateCheckItemStateOnCard":
                 // Handle updating the state of a checklist item on a card
-                console.log("Checklist item state updated:", action.data);
+                await handle_checklist_state_update(action.data);
+                if (VERBOSE) {
+                    console.log("Checklist item state updated:", action.data.checkItem);
+                }
+
                 break;
             
             case "deleteCheckItem":
