@@ -920,13 +920,13 @@ const handle_checklist_state_update = async (action_data) => {
     const defaultlists_ids = defaultlists.map(list => list.id);
 
     // Get the Done and Backlog lists
-    const done_list = defaultlists.find(list => DONE_LISTS.includes(list.name));
+    const done_list = defaultlists.find(list => DONE_LISTS.includes(list.name.toLowerCase()));
     const backlog_list = defaultlists.find(list => list.name === BACKLOG_LIST_NAME);
 
 
     // Get cards in default lists
     const checklist_cards = (await get_cards_in_lists(defaultlists_ids))
-        .filter(card => card.name.includes(checklist_item.name) && card.name.includes(source_card_name));
+        .filter(card => card.name.includes(checklist_item.name.toLowerCase()) && card.name.includes(source_card_name.toLowerCase()));
 
         
     // Iterate through the checklist cards
@@ -957,7 +957,7 @@ const handle_checklist_state_update = async (action_data) => {
                     console.log("checklist_card_list: ", checklist_card_list);
                     console.log("backlog_lists: ", backlog_lists);
                 }
-                if (!backlog_lists.includes(checklist_card_list.name)) {
+                if (!backlog_lists.includes(checklist_card_list.name.toLowerCase())) {
                     console.log("Checklist card is not in a backlog list:", checklist_card_list.name);
                     return;
                 }
@@ -1026,7 +1026,7 @@ const handle_source_card_deletion = async (action_data) => {
 
     // Get all incomplete checklist items
     const checklist_cards = (await get_cards_in_lists(defaultlists_ids))
-        .filter(card => card.name.includes(checklist_item.name) && card.name.includes(source_card.name));
+        .filter(card => card.name.includes(checklist_item.name.toLowerCase()) && card.name.includes(source_card.name.toLowerCase()));
 
     // Iterate through the incomplete checklist items
     await Promise.all(checklist_cards.map(async (checklist_card) => {
