@@ -953,6 +953,10 @@ const handle_checklist_state_update = async (action_data) => {
                 // Check if item is not in a backlog list
                 const checklist_card_list = await get_list_from_card_id(checklist_card.id);
                 const backlog_lists = [BACKLOG_LIST_NAME, ...WIP_LISTS];
+                if (DEBUG) {
+                    console.log("checklist_card_list: ", checklist_card_list);
+                    console.log("backlog_lists: ", backlog_lists);
+                }
                 if (!backlog_lists.includes(checklist_card_list.name)) {
                     console.log("Checklist card is not in a backlog list:", checklist_card_list.name);
                     return;
