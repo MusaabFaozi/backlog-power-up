@@ -1026,7 +1026,7 @@ const handle_source_card_deletion = async (action_data) => {
 
     // Get all incomplete checklist items
     const checklist_cards = (await get_cards_in_lists(defaultlists_ids))
-        .filter(card => card.name.includes(checklist_item.name.toLowerCase()) && card.name.includes(source_card.name.toLowerCase()));
+        .filter(card => card.name.includes(source_card.name.toLowerCase()));
 
     // Iterate through the incomplete checklist items
     await Promise.all(checklist_cards.map(async (checklist_card) => {
