@@ -102,7 +102,7 @@ exports.handler = async (event, context) => {
                     } else {
                         console.log("Unhandled card move from list:", action.data.listBefore.name, "==> list:", action.data.listAfter.name);
                     }
-                } else if (action.data.old && action.data.old.closed) {
+                } else if (action.data.old && !action.data.old.closed) {
 
                     // Handle card archival as deletion
                     await handle_source_card_deletion(action.data);
