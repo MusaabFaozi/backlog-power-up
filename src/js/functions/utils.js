@@ -940,7 +940,7 @@ const handle_checklist_state_update = async (action_data) => {
         }
 
         // Check if Task ID equals the card ID
-        const checkitem_id = meta_data.checkItemID;
+        const checkitem_id = meta_data.CheckItemID;
         if (DEBUG) {
             console.log("checkitem_id: ", checkitem_id);
             console.log("checklist_item.id: ", checklist_item.id);
