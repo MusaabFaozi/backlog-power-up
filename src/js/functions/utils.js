@@ -926,7 +926,7 @@ const handle_checklist_state_update = async (action_data) => {
 
     // Get cards in default lists
     const checklist_cards = (await get_cards_in_lists(defaultlists_ids))
-        .filter(card => card.name.includes(checklist_item.name.toLowerCase()) && card.name.includes(source_card_name.toLowerCase()));
+        .filter(card => card.name.includes(checklist_item.name) && card.name.includes(source_card_name));
 
         
     // Iterate through the checklist cards
